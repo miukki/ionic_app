@@ -5,6 +5,21 @@
 // the 2nd parameter is an array of 'requires'
 angular.module('starter', ['ionic'])
 
+.config(function($stateProvider, $urlRouterProvider) {
+  $urlRouterProvider.otherwise('/')
+
+  $stateProvider.state('index', {
+    url: '/',
+    templateUrl: 'index.html'
+  })
+
+  $stateProvider.state('subs', {
+    url: '/subs',
+    templateUrl: 'subs.html'
+  })
+
+})
+
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -23,12 +38,12 @@ angular.module('starter', ['ionic'])
   return {
     all: function() {
       return [
-        {'title': 'Subs Available'},
-        {'title': 'My Upcoming Classes'},
-        {'title': 'My Overdue Tasks'},
-        {'title': 'My Availability'},
-        {'title': 'My Finished Classes'},
-        {'title': 'My EF'}
+        {'title': 'Subs Available', 'sref': 'subs'},
+        {'title': 'My Upcoming Classes', 'sref': 'subs'},
+        {'title': 'My Overdue Tasks', 'sref': 'subs'},
+        {'title': 'My Availability', 'sref': 'subs'},
+        {'title': 'My Finished Classes', 'sref': 'subs'},
+        {'title': 'My EF', 'sref': 'subs'}
       ];
     }
   }
@@ -39,6 +54,8 @@ angular.module('starter', ['ionic'])
 
   $scope.stateMenu = true;
   $scope.menu = MenuF.all();
+  $scope.menuOdds = $scope.menu.filter(function(v, i, arr){return i%2==0})
+  $scope.menuEvens = $scope.menu.filter(function(v, i, arr){return i%2!=0})
 
   // Create and load the Modal
   $ionicModal.fromTemplateUrl('new-task.html', function(modal) {
@@ -75,5 +92,17 @@ angular.module('starter', ['ionic'])
     $ionicSideMenuDelegate.toggleLeft(fl);
     $scope.stateMenu = !$scope.stateMenu;
   };
+
+
+  // $timeout so everything is initialized
+  $timeout(function() {
+    if($scope.menu.length == 0) {
+      while(true) {
+        //show popup 'no-data available'
+        break;
+      }
+    }
+  });
+
 
 });
