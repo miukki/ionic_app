@@ -1,1 +1,6 @@
 /* Empty. Add your own CSS if you like */
+.scroll {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
