@@ -6,12 +6,21 @@ var sass = require('gulp-sass');
 var minifyCss = require('gulp-minify-css');
 var rename = require('gulp-rename');
 var sh = require('shelljs');
+var templateCache = require('gulp-angular-templatecache');
 
 var paths = {
   sass: ['./scss/**/*.scss']
 };
 
+gulp.task('tmpl', ['tmpl']);
+
 gulp.task('default', ['sass']);
+
+gulp.task('tmpl', function () {
+    gulp.src('www/tmpls/**/*.html')
+        .pipe(templateCache('tmpls.js', {module: 'starter'}))
+        .pipe(gulp.dest('www/js'));
+});
 
 gulp.task('sass', function(done) {
   gulp.src('./scss/ionic.app.scss')

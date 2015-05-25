@@ -1,0 +1,31 @@
+<ion-view title="Index Page">
+
+  <ion-nav-buttons side="right">
+      <button class="button button-icon" ng-click="newTask()">
+        <i class="icon ion-compose"></i>
+      </button>
+  </ion-nav-buttons>
+
+  <ion-content padding="true">
+    <div class="row clearfix" ng-repeat="odd in menuOdds">
+       <div class="col col-50">
+
+        <div class="card">
+          <div class="item item-text-wrap">
+            <button class="button button-clear" ui-sref="{{odd.sref}}">{{odd.title}}</button>
+          </div>
+        </div>
+
+       </div>
+       <div class="col col-50">
+
+        <div class="card">
+          <div class="item item-text-wrap">
+            <button class="button button-clear" ui-sref="{{menuEvens[$index].sref}}">{{menuEvens[$index].title}}</button>
+          </div>
+        </div>
+
+       </div>
+    </div>
+  </ion-content>
+</ion-view>
