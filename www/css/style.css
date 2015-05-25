@@ -4,3 +4,12 @@
   height: 100%;
   width: 100%;
 }
+.pull-right {
+  float: right;
+}
+.small {
+  font-size: 80%;
+}
+.card {
+  margin: 0px 10px;
+}

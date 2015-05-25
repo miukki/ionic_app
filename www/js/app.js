@@ -33,7 +33,6 @@ app.config(function($stateProvider, $urlRouterProvider) {
 .run(function($ionicPlatform, $templateCache) {
     //load templates
 
-
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -113,11 +112,20 @@ app.config(function($stateProvider, $urlRouterProvider) {
 })
 
 .controller('SubsCtrl', function($scope) {
-  console.log('SubsCtrl');
+  $scope.claimAll = function() {
+    console.log('1');
+  }
 })
 
-.controller('UpcomingCtrl', function($scope) {
-  console.log('UpcomingCtrl');
+.controller('UpcomingCtrl', function($scope, $http) {
+  $scope.upcomingCl = [];
+  $http.get('http://10.128.42.95/axis/wechat/LoadNextClasses?count=5').then(function(resp) {
+    console.log('resp.data', resp.data)
+    $scope.upcomingCl = resp.data.IsSuccess && resp.data.Result instanceof Array && resp.data.Result.length  ? resp.data.Result : [];
+  }, function(err) {
+    console.error('ERR', err);
+  })
+
 })
 
 .controller('IndexCtrl', function($scope, MenuF) {

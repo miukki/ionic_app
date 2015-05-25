@@ -7,7 +7,61 @@
     </button>
   </ion-nav-buttons>
 
+  <ion-nav-buttons side="right">
+    <button class="button icon-left ion-home" ui-sref="index"></button>
+  </ion-nav-buttons>
+
+
   <ion-content padding="true">
-    Subs
+
+
+    <ul class="list">
+
+      <li class="item item-toggle">
+         PL 12 AUG 20:00 NYT
+         <label class="toggle toggle-balanced">
+           <input type="checkbox">
+           <div class="track">
+             <div class="handle"></div>
+           </div>
+         </label>
+      </li>
+
+      <li class="item item-toggle">
+         PL 12 AUG 21:00 NYT
+         <label class="toggle toggle-balanced">
+           <input type="checkbox">
+           <div class="track">
+             <div class="handle"></div>
+           </div>
+         </label>
+      </li>
+
+      <li class="item item-toggle">
+         PL 12 AUG 22:00 NYT
+         <label class="toggle toggle-balanced">
+           <input type="checkbox">
+           <div class="track">
+             <div class="handle"></div>
+           </div>
+         </label>
+      </li>
+
+
+      <li class="item item-toggle">
+         PL 13 AUG 06:00 NYT
+         <label class="toggle toggle-balanced">
+           <input type="checkbox">
+           <div class="track">
+             <div class="handle"></div>
+           </div>
+         </label>
+      </li>
+
+    </ul>
+
+    <button class="button button-block button-light" ng-click="claimAll()">Claim All</button>
+    <button class="button button-block button-stable">Submit</button>
+
    </ion-content>
 </ion-view>

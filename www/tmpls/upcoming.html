@@ -6,9 +6,21 @@
       <i class="icon ion-navicon"></i>
     </button>
   </ion-nav-buttons>
+  <ion-nav-buttons side="right">
+    <button class="button icon-left ion-home" ui-sref="index"></button>
+  </ion-nav-buttons>
 
   <ion-content padding="true">
-    Upcoming Classes
+    <ion-list>
+      <ion-item ng-repeat="item in upcomingCl" class="clearfix">
+        <div class="pull-right small positive">
+          Start Time: {{item.startTime}}<br/>
+          End Time: {{item.endTime}}<br/>
+        </div>
+        <span class="dark">{{item.levelCode}}, {{item.serviceTypeCode}}</span>
+      </ion-item>
+    </ion-list>
+
    </ion-content>
 
 </ion-view>
