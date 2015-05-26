@@ -67,10 +67,19 @@ app.config(function($stateProvider, $urlRouterProvider) {
 })
 
 
-.controller('MainCtrl', function($scope, $timeout, $ionicModal, MenuF, $ionicSideMenuDelegate) {
-
+.controller('MainCtrl', function($scope, $timeout, $ionicModal, MenuF, $ionicSideMenuDelegate, $ionicLoading) {
   $scope.stateMenu = true;
   $scope.menu = MenuF.all();
+
+
+  // Setup the loader
+  $ionicLoading.show({
+    content: '<ion-spinner icon="dots"></ion-spinner>',
+    hideOnStageChange: true,
+    animation: 'fade-in',
+    showDelay: 0
+  });
+
 
   // Create and load the Modal
   $ionicModal.fromTemplateUrl('new-task.html', function(modal) {
@@ -117,18 +126,36 @@ app.config(function($stateProvider, $urlRouterProvider) {
   }
 })
 
-.controller('UpcomingCtrl', function($scope, $http) {
+.controller('UpcomingCtrl', function($scope, $http, $ionicLoading) {
+  $ionicLoading.show();
   $scope.upcomingCl = [];
+
+  function m(t) {
+    var d = new Date(t);
+    var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    this.day = d.getDate() + ' ' + days[d.getDay()];
+    this.time = (d.getHours() < 10 ? '0' + d.getHours() : d.getHours()) + ':' + (d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes()) + (d.getHours() < 12 ? 'am' : 'pm');
+  }
+
   $http.get('http://10.128.42.95/axis/wechat/LoadNextClasses?count=5').then(function(resp) {
-    console.log('resp.data', resp.data)
     $scope.upcomingCl = resp.data.IsSuccess && resp.data.Result instanceof Array && resp.data.Result.length  ? resp.data.Result : [];
+
+
+    $scope.upcomingCl.forEach(function(element, index, array) {
+      element.day = new m(element.startTime).day;
+      element.time = new m(element.startTime).time
+    });
+
+    $ionicLoading.hide();
+
   }, function(err) {
     console.error('ERR', err);
   })
 
 })
 
-.controller('IndexCtrl', function($scope, MenuF) {
+.controller('IndexCtrl', function($scope, MenuF, $ionicLoading) {
+  $ionicLoading.hide();
 
   $scope.menuOdds = MenuF.odds();
   $scope.menuEvens = MenuF.evens();

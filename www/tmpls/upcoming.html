@@ -1,4 +1,4 @@
-<ion-view title="Upcoming Classes">
+<ion-view title="Upcoming Classes (NYT)">
 
   <ion-nav-buttons side="left">
     <!-- Sub Menu -->
@@ -11,15 +11,22 @@
   </ion-nav-buttons>
 
   <ion-content padding="true">
-    <ion-list>
-      <ion-item ng-repeat="item in upcomingCl" class="clearfix">
-        <div class="pull-right small positive">
-          Start Time: {{item.startTime}}<br/>
-          End Time: {{item.endTime}}<br/>
-        </div>
-        <span class="dark">{{item.levelCode}}, {{item.serviceTypeCode}}</span>
-      </ion-item>
-    </ion-list>
+
+    <div class="row">
+
+      <div class="col col-33"><span class="button button-block button-stable ng-binding">Class&nbsp;Type</span></div>
+      <div class="col"><span class="button button-block button-stable ng-binding">Level</span></div>
+      <div class="col"><span class="button button-block button-stable ng-binding">Date</span></div>
+      <div class="col"><span class="button button-block button-stable ng-binding">Time</span></div>
+    </div>
+
+    <div class="row" ng-repeat="item in upcomingCl" >
+      <div class="col col-33"><span class="button button-block button-light ng-binding">{{item.serviceTypeCode}}</span></div>
+      <div class="col"><span class="button button-block button-light ng-binding">{{item.levelCode}}</span></div>
+      <div class="col"><span class="button button-block button-light ng-binding">{{item.day}}</span></div>
+      <div class="col"><span class="button button-block button-light ng-binding">{{item.time}}</span></div>
+    </div>
+
 
    </ion-content>
 

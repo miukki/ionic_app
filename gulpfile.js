@@ -9,7 +9,9 @@ var sh = require('shelljs');
 var templateCache = require('gulp-angular-templatecache');
 
 var paths = {
-  sass: ['./scss/**/*.scss']
+  sass: ['./scss/**/*.scss'],
+  tmpls: ['www/tmpls/**/*.html']
+
 };
 
 gulp.task('tmpl', ['tmpl']);
@@ -38,6 +40,8 @@ gulp.task('sass', function(done) {
 
 gulp.task('watch', function() {
   gulp.watch(paths.sass, ['sass']);
+  gulp.watch(paths.tmpls, ['tmpl']);
+
 });
 
 gulp.task('install', ['git-check'], function() {
