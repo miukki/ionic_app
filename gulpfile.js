@@ -7,10 +7,12 @@ var minifyCss = require('gulp-minify-css');
 var rename = require('gulp-rename');
 var sh = require('shelljs');
 var templateCache = require('gulp-angular-templatecache');
+var concat = require('gulp-concat');
 
 var paths = {
   sass: ['./scss/**/*.scss'],
-  tmpls: ['www/tmpls/**/*.html']
+  tmpls: ['www/tmpls/**/*.html'],
+  ctrls: ['www/ctrls/**/*.js']
 
 };
 
@@ -18,8 +20,15 @@ gulp.task('tmpl', ['tmpl']);
 
 gulp.task('default', ['sass']);
 
+
+gulp.task('ctrl', function () {
+    gulp.src(paths.ctrls[0])
+        .pipe(concat('controllers.js'))
+        .pipe(gulp.dest('www/js'));
+});
+
 gulp.task('tmpl', function () {
-    gulp.src('www/tmpls/**/*.html')
+    gulp.src(paths.tmpls[0])
         .pipe(templateCache('tmpls.js', {module: 'starter'}))
         .pipe(gulp.dest('www/js'));
 });
@@ -41,7 +50,7 @@ gulp.task('sass', function(done) {
 gulp.task('watch', function() {
   gulp.watch(paths.sass, ['sass']);
   gulp.watch(paths.tmpls, ['tmpl']);
-
+  gulp.watch(paths.ctrls, ['ctrl']);
 });
 
 gulp.task('install', ['git-check'], function() {

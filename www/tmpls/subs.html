@@ -23,13 +23,13 @@
     <form ng-submit="newPost()">
 
       <ion-toggle ng-repeat="item in subsCl" ng-model="item.choose" toggle-class="toggle-calm">
-        {{item.ServiceTypeCode + ' ' + item.LevelCode + ' ' + item.day + ' ' + item.month + ' ' + item.time + ' NYT'}}
+        {{(item.classGroup ? item.classGroup.serviceTypeCode + ' ' + item.classGroup.levelCode : '') + ' ' + item.day + ' ' + item.month + ' ' + item.time + ' NYT'}}
       </ion-toggle>
 
       <button type="submit" class="button button-block button-positive">Submit</button>
 
     </form>
-      <button class="button button-block button-light" ng-click="toggleClaim(toggle=!toggle)">{{toggle ? 'UnClaim All':'Claim All' }}</button>
+      <button class="button button-block button-light" ng-click="toggleClaim(toggle=!toggle)">{{toggle ? 'Check all':'Uncheck all' }}</button>
 
    </ion-content>
 </ion-view>
