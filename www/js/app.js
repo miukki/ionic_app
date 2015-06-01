@@ -4,7 +4,7 @@ var teacherMemberId = '1872';
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-var app = angular.module('starter', ['ionic']);
+var app = angular.module('starter', ['ionic', 'ngResource']);
 
 
 app.config(function($stateProvider, $urlRouterProvider) {
@@ -111,5 +111,39 @@ app.config(function($stateProvider, $urlRouterProvider) {
     this.time = (d.getHours() < 10 ? '0' + d.getHours() : d.getHours()) + ':' + (d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes()) + (d.getHours() < 12 ? 'am' : 'pm');
     this.month = months[d.getMonth()];
   }
+})
+
+.factory('formDataObject', function() {
+    return function(data) {
+        var fd = new FormData();
+        angular.forEach(data, function(value, key) {
+            fd.append(key, value);
+        });
+        return fd;
+    };
+})
+
+.factory('CallTroop', function($q, formDataObject, $http) {
+    return function(URL, DATA) {
+      var deferred = $q.defer();
+      var req = {
+       method: 'POST',
+       url: URL,
+       data: DATA,
+       transformRequest: formDataObject,
+       headers: {'Content-Type': undefined}
+      };
+
+      $http(req).then(function(resp) {
+        deferred.resolve(resp);
+      }, function(err){
+        deferred.reject(err);
+      });
+
+      return deferred.promise;
+
+    };
 });
+
+
 
