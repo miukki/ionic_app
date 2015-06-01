@@ -10,7 +10,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
   $urlRouterProvider.otherwise('/')
 
   $stateProvider.state('index', {
-    url: '/',
+    url: '/list',
     templateUrl: 'index.html',
     controller: 'IndexCtrl'
   })
@@ -30,19 +30,33 @@ app.config(function($stateProvider, $urlRouterProvider) {
 })
 
 
-.run(function($ionicPlatform, $templateCache) {
+.run(function($ionicPlatform) {
     //load templates
 
   $ionicPlatform.ready(function() {
+    console.log('ionic platform ready');
+
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
+
     if(window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
     }
+
     if(window.StatusBar) {
       StatusBar.styleDefault();
     }
+
   });
+})
+
+
+.constant('Constant', {
+    'host': '10.128.42.95',
+    'path': {
+      'up': '/axis/wechat/LoadNextClassesMock?count=5',
+      'subs': '/services/api/axis/query'
+    }
 })
 
 .factory('MenuF', function() {
@@ -65,6 +79,36 @@ app.config(function($stateProvider, $urlRouterProvider) {
     }
   }
 })
+
+/*
+.service('fileUpload', ['$http', function ($http) {
+    this.uploadFileToUrl = function(file, uploadUrl){
+        var fd = new FormData();
+        fd.append('file', file);
+        $http.post(uploadUrl, fd, {
+            transformRequest: angular.identity,
+            headers: {'Content-Type': undefined}
+        })
+        .success(function(){
+        })
+        .error(function(){
+        });
+    }
+}])
+
+*/
+.factory('Moment', function() {
+  return function(t) {
+    var d = new Date(t);
+    var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    this.day = d.getDate();
+    this.weekday = d.getDate() + ' ' + days[d.getDay()];
+    this.time = (d.getHours() < 10 ? '0' + d.getHours() : d.getHours()) + ':' + (d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes()) + (d.getHours() < 12 ? 'am' : 'pm');
+    this.month = months[d.getMonth()];
+  }
+})
+
 
 
 .controller('MainCtrl', function($scope, $timeout, $ionicModal, MenuF, $ionicSideMenuDelegate, $ionicLoading) {
@@ -120,36 +164,102 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
 })
 
-.controller('SubsCtrl', function($scope) {
-  $scope.claimAll = function() {
-    console.log('1');
+.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Constant) {
+  $ionicLoading.show();
+  $scope.error = '';
+  $scope.subsCl = [];
+
+  $scope.toggleClaim = function(fl) {
+    $scope.subsCl.forEach(function(element, index, array) {
+      element.choose = fl;
+    });
   }
+
+  $scope.newPost = function() {
+    console.log('postData', $scope.subsCl.filter(function(element){ return element.choose}));
+  }
+
+
+  var req = {
+   method: 'POST',
+   url: Constant.path.subs,
+   headers: {
+    'Content-Type': 'application/x-www-form-urlencoded'
+   },
+   data: { q: 'axis_assignable_class_type!\'{"TimeRange":{"StartTime":"2015-12-1","EndTime":"2015-12-2"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "1872"}}\'' },
+
+   transformRequest: function(obj) {
+        var str = [];
+        for (var key in obj) {
+            if (obj[key] instanceof Array) {
+                for(var idx in obj[key]){
+                    var subObj = obj[key][idx];
+                    for(var subKey in subObj){
+                        str.push(encodeURIComponent(key) + "[" + idx + "][" + encodeURIComponent(subKey) + "]=" + encodeURIComponent(subObj[subKey]));
+                    }
+                }
+            }
+            else {
+                str.push(encodeURIComponent(key) + "=" + encodeURIComponent(obj[key]));
+            }
+        }
+        return str.join("&");
+    }
+
+  }
+
+  $http(req)
+    .success(function(data, status, headers, config) {
+      console.log(data)
+    })
+    .error(function(data, status, headers, config) {
+      console.log('error')
+    });
+
+  /*
+
+  $http.get('http://' ).then(function(resp) {
+    $scope.subsCl = resp.data.IsSuccess && resp.data.Result instanceof Array && resp.data.Result.length  ? resp.data.Result : [];
+
+    $scope.subsCl.forEach(function(element, index, array) {
+      element.month = new Moment(element.StartTime).month;
+      element.day = new Moment(element.StartTime).day;
+      element.time = new Moment(element.StartTime).time;
+      element.choose = false;
+    });
+
+    $ionicLoading.hide();
+
+    }, function(err) {
+      console.error('ERR', err.config, err.statusText);
+      $ionicLoading.hide();
+      $scope.error = err.statusText || 'Error Request';
+  });
+
+*/
+
 })
 
-.controller('UpcomingCtrl', function($scope, $http, $ionicLoading) {
+.controller('UpcomingCtrl', function($scope, $http, $ionicLoading, Moment, Constant) {
   $ionicLoading.show();
   $scope.upcomingCl = [];
+  $scope.error = '';
 
-  function m(t) {
-    var d = new Date(t);
-    var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    this.day = d.getDate() + ' ' + days[d.getDay()];
-    this.time = (d.getHours() < 10 ? '0' + d.getHours() : d.getHours()) + ':' + (d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes()) + (d.getHours() < 12 ? 'am' : 'pm');
-  }
-
-  $http.get('http://10.128.42.95/axis/wechat/LoadNextClasses?count=5').then(function(resp) {
+  $http.get('http://' + Constant.host + Constant.path.up).then(function(resp) {
     $scope.upcomingCl = resp.data.IsSuccess && resp.data.Result instanceof Array && resp.data.Result.length  ? resp.data.Result : [];
 
-
     $scope.upcomingCl.forEach(function(element, index, array) {
-      element.day = new m(element.startTime).day;
-      element.time = new m(element.startTime).time
+      element.weekday = new Moment(element.StartTime).weekday;
+      element.time = new Moment(element.StartTime).time
     });
 
     $ionicLoading.hide();
 
   }, function(err) {
-    console.error('ERR', err);
+
+    console.error('ERR', err.config, err.statusText);
+    $ionicLoading.hide();
+    $scope.error = err.statusText || 'Error Request';
   })
 
 })

@@ -12,21 +12,25 @@
 
   <ion-content padding="true">
 
-    <div class="row">
-
-      <div class="col col-33"><span class="button button-block button-stable ng-binding">Class&nbsp;Type</span></div>
-      <div class="col"><span class="button button-block button-stable ng-binding">Level</span></div>
-      <div class="col"><span class="button button-block button-stable ng-binding">Date</span></div>
-      <div class="col"><span class="button button-block button-stable ng-binding">Time</span></div>
+    <div ng-show="error && error != ''" class="ng-hide card" >
+      <div class="item item-text-wrap assertive">
+        {{error}}
+      </div>
     </div>
 
-    <div class="row" ng-repeat="item in upcomingCl" >
-      <div class="col col-33"><span class="button button-block button-light ng-binding">{{item.serviceTypeCode}}</span></div>
-      <div class="col"><span class="button button-block button-light ng-binding">{{item.levelCode}}</span></div>
-      <div class="col"><span class="button button-block button-light ng-binding">{{item.day}}</span></div>
-      <div class="col"><span class="button button-block button-light ng-binding">{{item.time}}</span></div>
-    </div>
+    <div class="button-bar bar-stable" ng-hide="{{upcomingCl.length == 0}}">
+          <a class="button">Class&nbsp;Type</a>
+          <a class="button">Level</a>
+          <a class="button">Date</a>
+          <a class="button">Time</a>
+   </div>
 
+    <div class="button-bar bar-light" ng-repeat="item in upcomingCl" >
+          <a class="button button-small">{{item.ServiceTypeCode}}</a>
+          <a class="button button-small">{{item.LevelCode}}</a>
+          <a class="button button-small">{{item.weekday}}</a>
+          <a class="button button-small">{{item.time}}</a>
+   </div>
 
    </ion-content>
 

@@ -14,54 +14,22 @@
 
   <ion-content padding="true">
 
+    <div ng-show="error && error != ''" class="ng-hide card" >
+      <div class="item item-text-wrap assertive">
+        {{error}}
+      </div>
+    </div>
 
-    <ul class="list">
+    <form ng-submit="newPost()">
 
-      <li class="item item-toggle">
-         PL 12 AUG 20:00 NYT
-         <label class="toggle toggle-balanced">
-           <input type="checkbox">
-           <div class="track">
-             <div class="handle"></div>
-           </div>
-         </label>
-      </li>
+      <ion-toggle ng-repeat="item in subsCl" ng-model="item.choose" toggle-class="toggle-calm">
+        {{item.ServiceTypeCode + ' ' + item.LevelCode + ' ' + item.day + ' ' + item.month + ' ' + item.time + ' NYT'}}
+      </ion-toggle>
 
-      <li class="item item-toggle">
-         PL 12 AUG 21:00 NYT
-         <label class="toggle toggle-balanced">
-           <input type="checkbox">
-           <div class="track">
-             <div class="handle"></div>
-           </div>
-         </label>
-      </li>
+      <button type="submit" class="button button-block button-positive">Submit</button>
 
-      <li class="item item-toggle">
-         PL 12 AUG 22:00 NYT
-         <label class="toggle toggle-balanced">
-           <input type="checkbox">
-           <div class="track">
-             <div class="handle"></div>
-           </div>
-         </label>
-      </li>
-
-
-      <li class="item item-toggle">
-         PL 13 AUG 06:00 NYT
-         <label class="toggle toggle-balanced">
-           <input type="checkbox">
-           <div class="track">
-             <div class="handle"></div>
-           </div>
-         </label>
-      </li>
-
-    </ul>
-
-    <button class="button button-block button-light" ng-click="claimAll()">Claim All</button>
-    <button class="button button-block button-stable">Submit</button>
+    </form>
+      <button class="button button-block button-light" ng-click="toggleClaim(toggle=!toggle)">{{toggle ? 'UnClaim All':'Claim All' }}</button>
 
    </ion-content>
 </ion-view>
