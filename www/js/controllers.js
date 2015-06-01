@@ -96,27 +96,40 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
 
   var data = { q: 'axis_assignable_class_type!\'{"TimeRange":{"StartTime":"2015-12-1","EndTime":"2015-12-2"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "' + Constant.teacherMemberId + '"}}\'' };
 
-  CallTroop(Constant.path.subs, data).then(function(resp){
-      $scope.subsCl = resp.data && resp.data[0].data instanceof Array && resp.data[0].data.length  ? resp.data[0].data : [];
+  $scope.doRefresh = function() {
+    post(function() {
+      $scope.$broadcast('scroll.refreshComplete');
+    });
 
-      $scope.subsCl.forEach(function(element, index, array) {
+  };
 
-        element.month = new Moment(element.startTime).month;
-        element.day = new Moment(element.startTime).day;
-        element.time = new Moment(element.startTime).time;
-        element.choose = false;
+  post();
 
-      });
+  function post(cb) {
 
-      $ionicLoading.hide();
+    CallTroop(Constant.path.subs, data).then(function(resp){
+        $scope.subsCl = resp.data && resp.data[0].data instanceof Array && resp.data[0].data.length  ? resp.data[0].data : [];
 
-  }, function(err) {
+        $scope.subsCl.forEach(function(element, index, array) {
 
-      console.error('ERR', err.config, err.statusText);
-      $ionicLoading.hide();
-      $scope.error = 'Error: ' +  err.statusText || 'Error Request';
+          element.month = new Moment(element.startTime).month;
+          element.day = new Moment(element.startTime).day;
+          element.time = new Moment(element.startTime).time;
+          element.choose = false;
 
-  });
+        });
+
+        $ionicLoading.hide();
+
+    }, function(err) {
+
+        console.error('ERR', err.config, err.statusText);
+        $ionicLoading.hide();
+        $scope.error = 'Error: ' +  err.statusText || 'Error Request';
+
+    }).finally(cb);
+
+  }
 
 
 });
