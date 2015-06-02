@@ -14,7 +14,7 @@
 
   <ion-content padding="true">
 
-    <div ng-show="error && error != ''" class="ng-hide card" >
+    <div ng-show="(error && error != '') || subsCl.length == 0" class="ng-hide card" >
       <div class="item item-text-wrap assertive">
         {{error}}
       </div>
@@ -22,17 +22,24 @@
 
 
 
-    <form ng-submit="newPost()">
+    <div ng-hide="{{subsCl.length == 0}}">
 
-      <ion-refresher pulling-text="Pull to refresh" on-refresh="doRefresh()"></ion-refresher>
-      <ion-toggle ng-repeat="item in subsCl" ng-model="item.choosen" toggle-class="toggle-calm">
-        {{(item.classGroup ? item.classGroup.serviceTypeCode + ' ' + item.classGroup.levelCode : '') + ' ' + item.day + ' ' + item.month + ' ' + item.time + ' NYT'}}
-      </ion-toggle>
+      <form ng-submit="newPost()">
 
-      <button type="submit" class="button button-block button-positive">Submit</button>
+        <ion-refresher pulling-text="Pull to refresh" on-refresh="doRefresh()"></ion-refresher>
 
-    </form>
+        <ion-toggle ng-repeat="item in subsCl" ng-class="{stable-bg: item.assigned}" ng-model="item.choosen" toggle-class="toggle-calm">
+          {{(item.classGroup ? item.classGroup.serviceTypeCode + ' ' + item.classGroup.levelCode : '') + ' ' + item.day + ' ' + item.month + ' ' + item.time + ' NYT'}}
+        </ion-toggle>
+
+        <button type="submit" class="button button-block button-positive">Submit</button>
+
+      </form>
+
       <button class="button button-block button-light" ng-click="toggleClaim(toggle=!toggle)">{{toggle ? 'Check all':'Uncheck all' }}</button>
+
+    </div>
+
 
    </ion-content>
 </ion-view>

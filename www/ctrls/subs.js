@@ -2,6 +2,8 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
   $ionicLoading.show();
   $scope.error = '';
   $scope.subsCl = [];
+  var data = { q: 'axis_assignable_class_type!\'{"TimeRange":{"StartTime":"2015-12-1","EndTime":"2015-12-2"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "' + Constant.teacherMemberId + '"}}\'' };
+
 
   $scope.toggleClaim = function(fl) {
     $scope.subsCl.forEach(function(element, index, array) {
@@ -17,8 +19,10 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
       if (element.choosen) {
         var obj = MenuF.emptyObj();
         //inconsistent data!
+
+          element['index'] = index;
           element['teacherMemberId'] = Constant.teacherMemberId;
-          element['classStatus'] = new Array(element.classStatusCode);
+          element['classStatus'] = new Array(element.classStatusCode, 'Subout');
         //inconsistent data!
 
         Array.prototype.forEach.call(Object.keys(element), function (keyName, i, arr){
@@ -30,39 +34,63 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
 
     });
 
-
+    console.log('$scope.postData', $scope.postData);
     chainReq($scope.postData);
 
   }
 
-  var data = { q: 'axis_assignable_class_type!\'{"TimeRange":{"StartTime":"2015-12-1","EndTime":"2015-12-2"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "' + Constant.teacherMemberId + '"}}\'' };
 
   $scope.doRefresh = function() {
-    getSubsList(function() {
+    getSubsList(data, function() {
       $scope.$broadcast('scroll.refreshComplete');
     });
 
   };
 
-  getSubsList();
 
   function chainReq(arr) {
-    console.log('arr', arr);
+    fn(arr, 0);
+
+    function fn(arr,index) {
+      if (!arr[index]) {
+        return;
+      };
+
+      CallTroop(Constant.path.subsChain, arr[index], true).then(function(resp){
+            $scope.subsCl[arr[index].param['index']].assigned = true;
+            index++; fn(arr, index);
+      }, function(err){
+            index++; fn(arr, index);
+      });
+
+    };
+
+
+
   }
 
-  function getSubsList(cb) {
+  function getSubsList(data, cb) {
 
     CallTroop(Constant.path.subs, data).then(function(resp){
         $scope.subsCl = resp.data && resp.data[0].data instanceof Array && resp.data[0].data.length  ? resp.data[0].data : [];
 
-        $scope.subsCl.forEach(function(element, index, array) {
+        if (!$scope.subsCl.length){
 
-          element.month = new Moment(element.startTime).month;
-          element.day = new Moment(element.startTime).day;
-          element.time = new Moment(element.startTime).time;
-          element.choosen = false;
+          $scope.error = 'No data';
 
-        });
+        } else {
+
+          $scope.subsCl.forEach(function(element, index, array) {
+
+            element.month = new Moment(element.startTime).month;
+            element.day = new Moment(element.startTime).day;
+            element.time = new Moment(element.startTime).time;
+            element.choosen = false;
+
+          });
+
+        }
+
 
         $ionicLoading.hide();
 
@@ -75,6 +103,8 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
     }).finally(cb);
 
   }
+
+  getSubsList(data);
 
 
 });

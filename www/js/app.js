@@ -56,7 +56,8 @@ app.config(function($stateProvider, $urlRouterProvider) {
     'host': '10.128.42.95',
     'path': {
       'up': '/axis/wechat/LoadNextClassesMock?count=5',
-      'subs': '/services/api/axis/query'
+      'subs': '/services/api/axis/query',
+      'subsChain': '/services/api/axis/command/classcommand/AssignClass'
     },
     'teacherMemberId': teacherMemberId || '1872'
 
@@ -115,8 +116,8 @@ app.config(function($stateProvider, $urlRouterProvider) {
       return this.all().filter(function(v, i, arr){return i%2!=0})
     },
     emptyObj: function() {
-      return {'param':
-        {'classCriteria': {
+      return {'param': {
+         'classCriteria': {
             'timeRange': {'startTime': '', 'endTime': ''},
             'classGroup': {
               'serviceTypeCode': '',
@@ -130,9 +131,11 @@ app.config(function($stateProvider, $urlRouterProvider) {
             },
             'classMeta': {'isVideoClass': false},
             'assignableTeacher': {'teacherMemberId': ''},
-            'classStatus': ''
+            'classStatus': []
           },
-         'teacherCriteria': {'teacherMemberId': ''}
+         'teacherCriteria': {'teacherMemberId': ''},
+         'index': null
+
         }
       };
     }
@@ -180,18 +183,24 @@ app.config(function($stateProvider, $urlRouterProvider) {
 })
 
 .factory('CallTroop', function($q, formDataObject, $http) {
-    return function(URL, DATA) {
+    return function(URL, DATA, fl) {
       var deferred = $q.defer();
       var req = {
        method: 'POST',
        url: URL,
        data: DATA,
-       transformRequest: formDataObject,
-       headers: {'Content-Type': undefined}
+       headers: {'Content-Type': fl ? 'application/json' : undefined} //fl - if you need send post request with data
       };
+      if (!fl) {
+        req['transformRequest'] = formDataObject
+      }
 
       $http(req).then(function(resp) {
-        deferred.resolve(resp);
+        if (resp.data[0].status === 0) {
+          deferred.resolve(resp);
+        } else {
+          deferred.reject(resp);
+        }
       }, function(err){
         deferred.reject(err);
       });
