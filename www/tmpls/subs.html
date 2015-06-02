@@ -25,7 +25,7 @@
     <form ng-submit="newPost()">
 
       <ion-refresher pulling-text="Pull to refresh" on-refresh="doRefresh()"></ion-refresher>
-      <ion-toggle ng-repeat="item in subsCl" ng-model="item.choose" toggle-class="toggle-calm">
+      <ion-toggle ng-repeat="item in subsCl" ng-model="item.choosen" toggle-class="toggle-calm">
         {{(item.classGroup ? item.classGroup.serviceTypeCode + ' ' + item.classGroup.levelCode : '') + ' ' + item.day + ' ' + item.month + ' ' + item.time + ' NYT'}}
       </ion-toggle>
 

@@ -63,6 +63,39 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
 })
 
+.factory('ObjF', function() {
+  return {
+    replaceObjectKeysToValue: function(obj, key, value, needAll) {
+        var that = this;
+        function isObject(some) {
+            return (typeof some == 'object' && !Array.isArray(some));
+        }
+        var replaced = false;
+        var method = needAll ? 'forEach' : 'some';
+
+        Array.prototype[method].call(Object.keys(obj), function (keyName) {
+
+            if (keyName == key) {
+                obj[keyName] = value;
+                replaced = true;
+                return true;
+            } else if (obj[keyName] && isObject(obj[keyName])) {
+                var result = that.replaceObjectKeysToValue(obj[keyName], key, value, needAll);
+                if (!replaced) replaced = result;
+                return result;
+            } else {
+                return false;
+            }
+
+        });
+
+        return replaced;
+    }
+
+  }
+
+})
+
 .factory('MenuF', function() {
   return {
     all: function() {
@@ -80,7 +113,30 @@ app.config(function($stateProvider, $urlRouterProvider) {
     },
     evens: function() {
       return this.all().filter(function(v, i, arr){return i%2!=0})
+    },
+    emptyObj: function() {
+      return {'param':
+        {'classCriteria': {
+            'timeRange': {'startTime': '', 'endTime': ''},
+            'classGroup': {
+              'serviceTypeCode': '',
+              'serviceSubTypeCode': '',
+              'levelCode': '',
+              'partnerCode': '',
+              'marketCode': '',
+              'languageCode': '',
+              'unitCode': '',
+              'evcServerCode': ''
+            },
+            'classMeta': {'isVideoClass': false},
+            'assignableTeacher': {'teacherMemberId': ''},
+            'classStatus': ''
+          },
+         'teacherCriteria': {'teacherMemberId': ''}
+        }
+      };
     }
+
   }
 })
 
