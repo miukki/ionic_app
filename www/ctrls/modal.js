@@ -1,17 +1,10 @@
-app.controller('ModalCtrl', function($scope) {
-
-  $scope.createTask = function(menu) {
-    $scope.menu.push({
-      title: menu.title,
-      sref: 'index'
-    });
-    $scope.taskModal.hide();
-    menu.title = "";
-  };
+app.controller('ModalCtrl', function($scope, $ionicLoading) {
 
   // Close the new task modal
-  $scope.closeNewTask = function() {
-    $scope.taskModal.hide();
+  $scope.closeModal = function() {
+    $ionicLoading.show();
+    $scope.getSubsList();
+    $scope.modal.hide();
   };
 
 

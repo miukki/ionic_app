@@ -4,7 +4,7 @@ var teacherMemberId = '1872';
 // angular.module is a global place for creating, registering and retrieving Angular modules
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
-var app = angular.module('starter', ['ionic', 'ngResource']);
+var app = angular.module('starter', ['ionic']);
 
 
 app.config(function($stateProvider, $urlRouterProvider) {
@@ -60,8 +60,6 @@ app.config(function($stateProvider, $urlRouterProvider) {
       'subsChain': '/services/api/axis/command/classcommand/AssignClass'
     },
     'teacherMemberId': teacherMemberId || '1872'
-
-
 })
 
 .factory('ObjF', function() {
@@ -210,6 +208,40 @@ app.config(function($stateProvider, $urlRouterProvider) {
       return deferred.promise;
 
     };
+})
+
+.factory('chainReq', function($q, CallTroop, Constant){
+  return function(arr, subsCl){
+    var output = [], deferred = $q.defer();
+
+    fn(arr, 0);
+
+    function fn(arr,index) {
+      if (!arr[index]) {
+        deferred.resolve();
+        return;
+      };
+
+      CallTroop(Constant.path.subsChain, arr[index], true).then(function(resp){
+          subsCl[arr[index].param['index']]['assigned'] = true;
+          console.log('! success', subsCl[arr[index].param['index']]);
+
+      }, function(err){
+          subsCl[arr[index].param['index']]['assigned'] = false;
+          console.error('ERR', err.code, err.statusText);
+
+      }).finally(function(){
+          var idx = arr[index].param['index'];
+          //output = output.concat(subsCl.filter(function(v, i, arr){return i === idx}))
+          index++; fn(arr, index);
+      });
+
+    };
+
+    return deferred.promise;
+
+  };
+
 });
 
 

@@ -1,8 +1,17 @@
-app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Constant, $q, formDataObject, CallTroop, MenuF, ObjF) {
+app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Moment, Constant, CallTroop, MenuF, ObjF, chainReq, $timeout) {
   $ionicLoading.show();
   $scope.error = '';
   $scope.subsCl = [];
-  var data = { q: 'axis_assignable_class_type!\'{"TimeRange":{"StartTime":"2015-12-3","EndTime":"2015-12-4"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "' + Constant.teacherMemberId + '"}}\'' };
+  $scope.isDisabled = false;
+
+  // Create and load the Modal
+  $ionicModal.fromTemplateUrl('modal.html', function(modal) {
+    $scope.modal = modal;
+  }, {
+    scope: $scope,
+    animation: 'slide-in-up'
+  });
+
 
 
   $scope.toggleClaim = function(fl) {
@@ -13,14 +22,15 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
 
   $scope.newPost = function() {
     $scope.postData = [];
+    $scope.isDisabled = true;
+
 
     $scope.subsCl.forEach(function(element, index, array){
 
       if (element.choosen) {
         var obj = MenuF.emptyObj();
-        //inconsistent data!
-
           element['index'] = index;
+        //inconsistent data!
           element['teacherMemberId'] = Constant.teacherMemberId;
           element['classStatus'] = new Array(element.classStatusCode, 'Subout');
         //inconsistent data!
@@ -34,50 +44,24 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
 
     });
 
-    chainReq($scope.postData);
+    chainReq($scope.postData, $scope.subsCl).then(function(){
+      $scope.isDisabled = false;
+      $scope.modal.show();
+    });
 
   }
 
 
   $scope.doRefresh = function() {
-    getSubsList(data, function() {
+    $scope.getSubsList(function() {
       $scope.$broadcast('scroll.refreshComplete');
     });
 
   };
 
 
-  function chainReq(arr) {
-    fn(arr, 0);
-
-    function fn(arr,index) {
-      if (!arr[index]) {
-        return;
-      };
-
-
-      CallTroop(Constant.path.subsChain, arr[index], true).then(function(resp){
-          var idx = arr[index].param['index'];
-          $scope.subsCl[idx]['assigned'] = true;
-          console.log('! success', $scope.subsCl[idx]);
-
-      }, function(err){
-
-          console.error('ERR', err.code, err.statusText);
-
-      }).finally(function(){
-          console.log('finally', index);
-          index++; fn(arr, index);
-
-      });
-
-    };
-
-
-
-  }
-
-  function getSubsList(data, cb) {
+  $scope.getSubsList = function(cb) {
+    var data = { q: 'axis_assignable_class_type!\'{"TimeRange":{"StartTime":"2015-12-4","EndTime":"2015-12-5"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "' + Constant.teacherMemberId + '"}}\'' };
 
     CallTroop(Constant.path.subs, data).then(function(resp){
         $scope.subsCl = resp.data && resp.data[0].data instanceof Array && resp.data[0].data.length  ? resp.data[0].data : [];
@@ -97,6 +81,7 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
 
         $ionicLoading.hide();
 
+
     }, function(err) {
 
         console.error('ERR', err.code, err.statusText);
@@ -107,7 +92,7 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
 
   }
 
-  getSubsList(data);
+  $scope.getSubsList();
 
 
 });

@@ -1,4 +1,4 @@
-app.controller('MainCtrl', function($scope, $timeout, $ionicModal, MenuF, $ionicSideMenuDelegate, $ionicLoading) {
+app.controller('MainCtrl', function($scope, $timeout, MenuF, $ionicSideMenuDelegate, $ionicLoading) {
 
   $scope.stateMenu = true;
   $scope.menu = MenuF.all();
@@ -13,14 +13,6 @@ app.controller('MainCtrl', function($scope, $timeout, $ionicModal, MenuF, $ionic
   });
 
 
-  // Create and load the Modal
-  $ionicModal.fromTemplateUrl('new-task.html', function(modal) {
-    $scope.taskModal = modal;
-  }, {
-    scope: $scope,
-    animation: 'slide-in-up'
-  });
-
   $scope.selectMenu = function(item, index) {
     $scope.activeMenu = item;
     $scope.toggleMenu($scope.stateMenu);
@@ -28,7 +20,7 @@ app.controller('MainCtrl', function($scope, $timeout, $ionicModal, MenuF, $ionic
 
   // Open our new task modal
   $scope.newTask = function() {
-    $scope.taskModal.show();
+    //create new task;
   };
 
 

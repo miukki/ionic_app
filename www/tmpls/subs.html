@@ -22,13 +22,13 @@
 
 
 
-    <div ng-init="isDisabled = false" ng-class="{'ng-hide': subsCl.length == 0}">
+    <div ng-class="{'ng-hide': subsCl.length == 0}">
 
-      <form ng-submit="isDisabled = true; newPost()">
+      <form ng-submit="newPost()">
 
         <ion-refresher pulling-text="Pull to refresh" on-refresh="doRefresh()"></ion-refresher>
 
-        <ion-toggle ng-repeat="item in subsCl" ng-class="{'balanced-bg': item.assigned}" ng-model="item.choosen" toggle-class="toggle-calm">
+        <ion-toggle ng-repeat="item in subsCl" ng-class="{'balanced-bg': item.assigned, 'assertive-bg': item.assigned ===false}" ng-model="item.choosen" toggle-class="toggle-calm">
           {{(item.classGroup ? item.classGroup.serviceTypeCode + ' ' + item.classGroup.levelCode : '') + ' ' + item.day + ' ' + item.month + ' ' + item.time + ' NYT'}}
         </ion-toggle>
 
