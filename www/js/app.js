@@ -53,9 +53,9 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
 
 .constant('Constant', {
-    'host': '10.128.42.95',
+    'strq': 'axis_assignable_class_type!\'{"TimeRange":{"StartTime":"%s","EndTime":"%s"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "%s" }}\'',
     'path': {
-      'up': '/axis/wechat/LoadNextClassesMock?count=5',
+      'up': '/axis/wechat/LoadNextClassesMock?count=100',
       'subs': '/services/api/axis/query',
       'subsChain': '/services/api/axis/command/classcommand/AssignClass'
     },
@@ -159,18 +159,6 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
 */
 
-.factory('Moment', function() {
-  return function(t) {
-    var d = new Date(t);
-    var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    this.day = d.getDate();
-    this.weekday = d.getDate() + ' ' + days[d.getDay()];
-    this.time = (d.getHours() < 10 ? '0' + d.getHours() : d.getHours()) + ':' + (d.getMinutes() < 10 ? '0' + d.getMinutes() : d.getMinutes()) + (d.getHours() < 12 ? 'am' : 'pm');
-    this.month = months[d.getMonth()];
-  }
-})
-
 .factory('formDataObject', function() {
     return function(data) {
         var fd = new FormData();
@@ -242,7 +230,45 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
   };
 
+})
+
+.filter('sprintf', function() {
+    return function() {
+
+      function parse(str, args) {
+          var i = 0;
+          return str.replace(/%s/g, function() { return args[i++] || '';});
+      }
+
+      return parse(Array.prototype.slice.call(arguments, 0,1)[0], Array.prototype.slice.call(arguments, 1));
+
+  }
+
+})
+
+.filter('SetIntDay', function($filter){
+  return function(t, shift) {
+    var cur = t,
+    currD = shiftDay(t,shift),
+    nextD = shiftDay(currD,1),
+    output = [];
+
+    function shiftDay(d, shift) {
+      if (!shift) {
+        return new Date(d)
+      }
+      return new Date(new Date(d).setDate(new Date(d).getDate() + shift))
+    };
+
+    function format(t) {
+      //making format yyyy-mm-dd
+      return $filter('date')(t,'yyyy') + '-' + $filter('date')(t,'MM') + '-' + $filter('date')(t,'dd');
+    };
+
+    return output.concat([format(currD), format(nextD)])
+  }
 });
+
 
 
 

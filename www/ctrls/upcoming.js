@@ -1,14 +1,15 @@
-app.controller('UpcomingCtrl', function($scope, $http, $ionicLoading, Moment, Constant) {
+app.controller('UpcomingCtrl', function($scope, $http, $ionicLoading, Constant, $filter) {
   $ionicLoading.show();
   $scope.upcomingCl = [];
   $scope.error = '';
 
-  $http.get('http://' + Constant.host + Constant.path.up).then(function(resp) {
+  $http.get(Constant.path.up).then(function(resp) {
     $scope.upcomingCl = resp.data.IsSuccess && resp.data.Result instanceof Array && resp.data.Result.length  ? resp.data.Result : [];
 
     $scope.upcomingCl.forEach(function(element, index, array) {
-      element.weekday = new Moment(element.StartTime).weekday;
-      element.time = new Moment(element.StartTime).time
+      var t = new Date(element.StartTime);
+      angular.extend(element, {weekday: $filter('date')(t, 'EEE'), time: $filter('date')(t, 'hh') + ':' + $filter('date')(t, 'mm')});
+
     });
 
     $ionicLoading.hide();
@@ -18,6 +19,7 @@ app.controller('UpcomingCtrl', function($scope, $http, $ionicLoading, Moment, Co
     console.error('ERR', err.config, err.statusText);
     $ionicLoading.hide();
     $scope.error = err.statusText || 'Error Request';
+
   })
 
 });

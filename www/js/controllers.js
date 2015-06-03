@@ -78,7 +78,7 @@ app.controller('ModalCtrl', function($scope, $ionicLoading) {
 
 });
 
-app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Moment, Constant, CallTroop, MenuF, ObjF, chainReq, $timeout) {
+app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant, CallTroop, MenuF, ObjF, chainReq, $timeout, $filter) {
   $ionicLoading.show();
   $scope.error = '';
   $scope.subsCl = [];
@@ -134,24 +134,30 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Moment, 
 
 
   $scope.doRefresh = function() {
-    $scope.getSubsList(function() {
+    $scope.getSubsList().finally(function(){
       $scope.$broadcast('scroll.refreshComplete');
     });
 
   };
 
 
-  $scope.getSubsList = function(cb) {
-    var data = { q: 'axis_assignable_class_type!\'{"TimeRange":{"StartTime":"2015-12-4","EndTime":"2015-12-5"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "' + Constant.teacherMemberId + '"}}\'' };
+  $scope.getSubsList = function(shift) {
+    shift = shift || 0;
+    var t = $filter('SetIntDay')('2015-12-01',shift); //0 - shift valeu
+    //console.log('t',t);
+    var str = $filter('sprintf')(Constant.strq, t[0], t[1], Constant.teacherMemberId);
+    var data = { q: str };
 
-    CallTroop(Constant.path.subs, data).then(function(resp){
+
+    return CallTroop(Constant.path.subs, data).then(function(resp){
         $scope.subsCl = resp.data && resp.data[0].data instanceof Array && resp.data[0].data.length  ? resp.data[0].data : [];
 
         if (!$scope.subsCl.length){
           $scope.error = 'No data';
         } else {
           $scope.subsCl.forEach(function(element, index, array) {
-            angular.extend(element, {'month': new Moment(element.startTime).month, 'day': new Moment(element.startTime).day, 'time': new Moment(element.startTime).time, 'choosen': false, 'assigned': undefined})
+            var t = new Date(element.startTime);
+            angular.extend(element, {month: $filter('date')(t, 'MMM'), day: $filter('date')(t, 'dd'), time: $filter('date')(t, 'hh') + ':' + $filter('date')(t, 'mm'), choosen: false, assigned: undefined})
           });
         }
 
@@ -164,7 +170,7 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Moment, 
         $ionicLoading.hide();
         $scope.error = 'Error: ' +  err.statusText || 'Error Request';
 
-    }).finally(cb);
+    });
 
   }
 
@@ -173,17 +179,18 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Moment, 
 
 });
 
-app.controller('UpcomingCtrl', function($scope, $http, $ionicLoading, Moment, Constant) {
+app.controller('UpcomingCtrl', function($scope, $http, $ionicLoading, Constant, $filter) {
   $ionicLoading.show();
   $scope.upcomingCl = [];
   $scope.error = '';
 
-  $http.get('http://' + Constant.host + Constant.path.up).then(function(resp) {
+  $http.get(Constant.path.up).then(function(resp) {
     $scope.upcomingCl = resp.data.IsSuccess && resp.data.Result instanceof Array && resp.data.Result.length  ? resp.data.Result : [];
 
     $scope.upcomingCl.forEach(function(element, index, array) {
-      element.weekday = new Moment(element.StartTime).weekday;
-      element.time = new Moment(element.StartTime).time
+      var t = new Date(element.StartTime);
+      angular.extend(element, {weekday: $filter('date')(t, 'EEE'), time: $filter('date')(t, 'hh') + ':' + $filter('date')(t, 'mm')});
+
     });
 
     $ionicLoading.hide();
@@ -193,6 +200,7 @@ app.controller('UpcomingCtrl', function($scope, $http, $ionicLoading, Moment, Co
     console.error('ERR', err.config, err.statusText);
     $ionicLoading.hide();
     $scope.error = err.statusText || 'Error Request';
+
   })
 
 });
