@@ -10,7 +10,7 @@ var templateCache = require('gulp-angular-templatecache');
 var concat = require('gulp-concat');
 
 var paths = {
-  sass: ['./scss/**/*.scss'],
+  sass: ['./scss/**/*.scss', './www/lib/ionic/scss/**/*.scss'],
   tmpls: ['www/tmpls/**/*.html'],
   ctrls: ['www/ctrls/**/*.js']
 

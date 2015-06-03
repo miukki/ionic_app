@@ -160,6 +160,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
 }])
 
 */
+
 .factory('Moment', function() {
   return function(t) {
     var d = new Date(t);
@@ -199,9 +200,10 @@ app.config(function($stateProvider, $urlRouterProvider) {
         if (resp.data[0].status === 0) {
           deferred.resolve(resp);
         } else {
-          deferred.reject(resp);
+          deferred.reject({'code': resp.data[0].status, 'statusText': resp.data[0].message});
         }
       }, function(err){
+        console.log('err', err)
         deferred.reject(err);
       });
 

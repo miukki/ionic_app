@@ -83,7 +83,7 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
   $ionicLoading.show();
   $scope.error = '';
   $scope.subsCl = [];
-  var data = { q: 'axis_assignable_class_type!\'{"TimeRange":{"StartTime":"2015-12-1","EndTime":"2015-12-2"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "' + Constant.teacherMemberId + '"}}\'' };
+  var data = { q: 'axis_assignable_class_type!\'{"TimeRange":{"StartTime":"2015-12-3","EndTime":"2015-12-4"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "' + Constant.teacherMemberId + '"}}\'' };
 
 
   $scope.toggleClaim = function(fl) {
@@ -115,7 +115,6 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
 
     });
 
-    console.log('$scope.postData', $scope.postData);
     chainReq($scope.postData);
 
   }
@@ -137,11 +136,20 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
         return;
       };
 
+
       CallTroop(Constant.path.subsChain, arr[index], true).then(function(resp){
-            $scope.subsCl[arr[index].param['index']].assigned = true;
-            index++; fn(arr, index);
+          var idx = arr[index].param['index'];
+          $scope.subsCl[idx]['assigned'] = true;
+          console.log('! success', $scope.subsCl[idx]);
+
       }, function(err){
-            index++; fn(arr, index);
+
+          console.error('ERR', err.code, err.statusText);
+
+      }).finally(function(){
+          console.log('finally', index);
+          index++; fn(arr, index);
+
       });
 
     };
@@ -156,11 +164,8 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
         $scope.subsCl = resp.data && resp.data[0].data instanceof Array && resp.data[0].data.length  ? resp.data[0].data : [];
 
         if (!$scope.subsCl.length){
-
           $scope.error = 'No data';
-
         } else {
-
           $scope.subsCl.forEach(function(element, index, array) {
 
             element.month = new Moment(element.startTime).month;
@@ -169,15 +174,13 @@ app.controller('SubsCtrl', function($scope, $ionicLoading, $http, Moment, Consta
             element.choosen = false;
 
           });
-
         }
-
 
         $ionicLoading.hide();
 
     }, function(err) {
 
-        console.error('ERR', err.config, err.statusText);
+        console.error('ERR', err.code, err.statusText);
         $ionicLoading.hide();
         $scope.error = 'Error: ' +  err.statusText || 'Error Request';
 

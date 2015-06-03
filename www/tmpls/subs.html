@@ -22,21 +22,21 @@
 
 
 
-    <div ng-hide="{{subsCl.length == 0}}">
+    <div ng-init="isDisabled = false" ng-class="{'ng-hide': subsCl.length == 0}">
 
-      <form ng-submit="newPost()">
+      <form ng-submit="isDisabled = true; newPost()">
 
         <ion-refresher pulling-text="Pull to refresh" on-refresh="doRefresh()"></ion-refresher>
 
-        <ion-toggle ng-repeat="item in subsCl" ng-class="{stable-bg: item.assigned}" ng-model="item.choosen" toggle-class="toggle-calm">
+        <ion-toggle ng-repeat="item in subsCl" ng-class="{'balanced-bg': item.assigned}" ng-model="item.choosen" toggle-class="toggle-calm">
           {{(item.classGroup ? item.classGroup.serviceTypeCode + ' ' + item.classGroup.levelCode : '') + ' ' + item.day + ' ' + item.month + ' ' + item.time + ' NYT'}}
         </ion-toggle>
 
-        <button type="submit" class="button button-block button-positive">Submit</button>
+        <button type="submit" class="button button-block button-positive" ng-disabled="isDisabled">Submit</button>
 
       </form>
 
-      <button class="button button-block button-light" ng-click="toggleClaim(toggle=!toggle)">{{toggle ? 'Check all':'Uncheck all' }}</button>
+      <button ng-disabled="isDisabled" class="button button-block button-light" ng-click="toggleClaim(toggle=!toggle)">{{toggle ? 'Check all':'Uncheck all' }}</button>
 
     </div>
 
