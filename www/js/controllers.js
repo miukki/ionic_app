@@ -61,6 +61,20 @@ app.controller('ModalCtrl', function($scope, $ionicLoading) {
     $scope.modal.hide();
   };
 
+ //Cleanup the modal when we're done with it!
+  $scope.$on('$destroy', function() {
+    // Execute
+  });
+  // Execute action on hide modal
+  $scope.$on('modal.hidden', function() {
+    // Execute action
+  });
+  // Execute action on remove modal
+  $scope.$on('modal.removed', function() {
+    // Execute action
+    console.log('3')
+  });
+
 
 });
 
@@ -75,7 +89,8 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Moment, 
     $scope.modal = modal;
   }, {
     scope: $scope,
-    animation: 'slide-in-up'
+    animation: 'slide-in-up',
+    backdropClickToClose: false
   });
 
 
@@ -136,12 +151,7 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Moment, 
           $scope.error = 'No data';
         } else {
           $scope.subsCl.forEach(function(element, index, array) {
-
-            element.month = new Moment(element.startTime).month;
-            element.day = new Moment(element.startTime).day;
-            element.time = new Moment(element.startTime).time;
-            element.choosen = false;
-
+            angular.extend(element, {'month': new Moment(element.startTime).month, 'day': new Moment(element.startTime).day, 'time': new Moment(element.startTime).time, 'choosen': false, 'assigned': undefined})
           });
         }
 
