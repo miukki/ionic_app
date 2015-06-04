@@ -59,7 +59,8 @@ app.config(function($stateProvider, $urlRouterProvider) {
       'subs': '/services/api/axis/query',
       'subsChain': '/services/api/axis/command/classcommand/AssignClass'
     },
-    'teacherMemberId': teacherMemberId || '1872'
+    'teacherMemberId': teacherMemberId || '1872',
+    'currentDay': '2015-12-01'
 })
 
 .factory('ObjF', function() {
@@ -232,6 +233,44 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
 })
 
+.factory('getSubsList', function(CallTroop, Constant, $filter, $ionicLoading) {
+  return function(day, shift) {
+
+    var interval = $filter('SetIntDay')(day, shift),//0 - offset days
+    str = $filter('sprintf')(Constant.strq, interval[0], interval[1], Constant.teacherMemberId),
+    subsCl = {},
+    error;
+
+    console.log('interval', interval);
+
+    return CallTroop(Constant.path.subs, { q: str }).then(function(resp){
+        subsCl = resp.data && resp.data[0].data instanceof Array && resp.data[0].data.length  ? resp.data[0].data : [];
+
+        if (!subsCl.length){
+          error = 'No data';
+        } else {
+          subsCl.forEach(function(element, index, array) {
+            var t = new Date(element.startTime);
+            angular.extend(element, {month: $filter('date')(t, 'MMM'), day: $filter('date')(t, 'dd'), time: $filter('date')(t, 'hh') + ':' + $filter('date')(t, 'mm'), choosen: false, assigned: undefined})
+          });
+        }
+
+        $ionicLoading.hide();
+        return {error, subsCl};
+
+
+    }, function(err) {
+
+        console.error('ERR', err.code, err.statusText);
+        $ionicLoading.hide();
+        error = 'Error: ' +  err.statusText || 'Error Request';
+        return {error};
+    });
+
+  };
+
+})
+
 .filter('sprintf', function() {
     return function() {
 
@@ -248,8 +287,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
 .filter('SetIntDay', function($filter){
   return function(t, shift) {
-    var cur = t,
-    currD = shiftDay(t,shift),
+    var currD = shiftDay(t,shift),
     nextD = shiftDay(currD,1),
     output = [];
 

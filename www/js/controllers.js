@@ -78,11 +78,12 @@ app.controller('ModalCtrl', function($scope, $ionicLoading) {
 
 });
 
-app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant, CallTroop, MenuF, ObjF, chainReq, $timeout, $filter) {
+app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant, CallTroop, MenuF, ObjF, chainReq, $timeout, $filter, getSubsList) {
   $ionicLoading.show();
   $scope.error = '';
   $scope.subsCl = [];
   $scope.isDisabled = false;
+  $scope.shift = 0;
 
   // Create and load the Modal
   $ionicModal.fromTemplateUrl('modal.html', function(modal) {
@@ -93,6 +94,13 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant
     backdropClickToClose: false
   });
 
+
+  var step = (function() {
+      var count= 1;
+      return function () {
+          return count++;
+      }
+  })();
 
 
   $scope.toggleClaim = function(fl) {
@@ -110,10 +118,9 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant
 
       if (element.choosen) {
         var obj = MenuF.emptyObj();
-          element['index'] = index;
+
         //inconsistent data!
-          element['teacherMemberId'] = Constant.teacherMemberId;
-          element['classStatus'] = new Array(element.classStatusCode, 'Subout');
+          angular.extend(element, {'index': index, 'teacherMemberId': Constant.teacherMemberId, 'classStatus': new Array(element.classStatusCode, 'Subout')})
         //inconsistent data!
 
         Array.prototype.forEach.call(Object.keys(element), function (keyName, i, arr){
@@ -133,48 +140,49 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant
   }
 
 
+  $scope.moreDataCanBeLoaded = function(shift) {
+    console.log('shift', shift);
+    var fl = shift < 9  ? true : false;
+    return fl;
+  }
+
+  $scope.loadMoreData = function() {
+    $scope.shift = step();
+    console.log('loadMoreData', $scope.shift)
+
+    getSubsList(Constant.currentDay, $scope.shift).then(function(data) {
+
+      if (data.err) {
+        $scope.error = data.err; return;
+      }
+      $scope.subsCl = $scope.subsCl.concat(data['subsCl']);
+
+      $timeout(function() {
+        $scope.$broadcast('scroll.infiniteScrollComplete');
+      }, 2000);
+
+    });
+  }
+
   $scope.doRefresh = function() {
-    $scope.getSubsList().finally(function(){
+    getSubsList(Constant.currentDay, 0).then(function(data) {
+      if (data.err) {
+        $scope.error = data.err; return;
+      }
+      $scope.subsCl = data['subsCl'];
+      $scope.shift = 0;
       $scope.$broadcast('scroll.refreshComplete');
     });
 
   };
 
 
-  $scope.getSubsList = function(shift) {
-    shift = shift || 0;
-    var t = $filter('SetIntDay')('2015-12-01',shift); //0 - shift valeu
-    //console.log('t',t);
-    var str = $filter('sprintf')(Constant.strq, t[0], t[1], Constant.teacherMemberId);
-    var data = { q: str };
-
-
-    return CallTroop(Constant.path.subs, data).then(function(resp){
-        $scope.subsCl = resp.data && resp.data[0].data instanceof Array && resp.data[0].data.length  ? resp.data[0].data : [];
-
-        if (!$scope.subsCl.length){
-          $scope.error = 'No data';
-        } else {
-          $scope.subsCl.forEach(function(element, index, array) {
-            var t = new Date(element.startTime);
-            angular.extend(element, {month: $filter('date')(t, 'MMM'), day: $filter('date')(t, 'dd'), time: $filter('date')(t, 'hh') + ':' + $filter('date')(t, 'mm'), choosen: false, assigned: undefined})
-          });
-        }
-
-        $ionicLoading.hide();
-
-
-    }, function(err) {
-
-        console.error('ERR', err.code, err.statusText);
-        $ionicLoading.hide();
-        $scope.error = 'Error: ' +  err.statusText || 'Error Request';
-
-    });
-
-  }
-
-  $scope.getSubsList();
+  getSubsList(Constant.currentDay).then(function(data) {
+      if (data.err) {
+        $scope.error = data.err; return;
+      }
+      $scope.subsCl = data['subsCl'];
+  });
 
 
 });
