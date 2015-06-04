@@ -75,7 +75,7 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant
       if (data.err) {
         $scope.error = data.err; return;
       }
-      $scope.subsCl = $scope.subsCl.concat(data['subsCl']);
+      $scope.subsCl = data['subsCl'];//$scope.subsCl.concat(data['subsCl']);
 
       $timeout(function() {
         $scope.$broadcast('scroll.infiniteScrollComplete');
@@ -83,6 +83,10 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant
 
     });
   }
+
+  $scope.$on('$stateChangeSuccess', function() {
+    $scope.loadMoreData();
+  });
 
   $scope.doRefresh = function() {
     getSubsList(Constant.currentDay, 0).then(function(data) {

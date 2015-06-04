@@ -261,7 +261,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
     }, function(err) {
 
-        console.error('ERR', err.code, err.statusText);
+        console.error('ERR', err, err ? (err.code + err.statusText) : '');
         $ionicLoading.hide();
         error = 'Error: ' +  err.statusText || 'Error Request';
         return {error};
