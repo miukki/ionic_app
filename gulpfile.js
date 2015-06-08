@@ -23,8 +23,7 @@ gulp.task('default', ['sass', 'tmpl', 'ctrl']);
 gulp.task('lint', function() {
   return gulp.src(paths.lint)
     .pipe(jshint())
-    .pipe(jshint.reporter('jshint-stylish', { verbose: true }))
-    .pipe(jshint.reporter('fail'));
+    .pipe(jshint.reporter('jshint-stylish', { verbose: true }));
 });
 
 gulp.task('ctrl', function () {

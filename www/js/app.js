@@ -213,7 +213,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
         return;
       }
 
-      CallTroop(Constant.path.subsChain, arr[index], true).then(function(resp){
+      CallTroop(Constant.path.subsChain, arr[index], true).then(function(){
           subsCl[arr[index].param.index].assigned = true;
           console.log('! success', subsCl[arr[index].param.index]);
 
@@ -222,7 +222,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
           console.error('ERR', err.code, err.statusText);
 
       }).finally(function(){
-          var idx = arr[index].param.index;
+          //var idx = arr[index].param.index;
           //output = output.concat(subsCl.filter(function(v, i, arr){return i === idx}))
           index++; fn(arr, index);
       });
@@ -254,7 +254,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
         if (!subsCl.length){
           error = 'No data';
         } else {
-          subsCl.forEach(function(element, index, array) {
+          subsCl.forEach(function(element) {
             var t = new Date(element.startTime);
             angular.extend(element, {month: $filter('date')(t, 'MMM'), day: $filter('date')(t, 'dd'), time: $filter('date')(t, 'hh') + ':' + $filter('date')(t, 'mm'), choosen: false, assigned: undefined});
           });
@@ -314,6 +314,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
     return output.concat([format(currD), format(nextD)]);
   };
+
 });
 
 
