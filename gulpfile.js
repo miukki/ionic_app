@@ -20,6 +20,8 @@ var paths = {
 
 gulp.task('default', ['sass', 'tmpl', 'ctrl']);
 
+gulp.task('release', ['sass', 'tmpl', 'ctrl', 'lint']); //not ready
+
 gulp.task('lint', function() {
   return gulp.src(paths.lint)
     .pipe(jshint())
