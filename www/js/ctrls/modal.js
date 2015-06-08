@@ -1,10 +1,12 @@
-app.controller('ModalCtrl', function($scope, $ionicLoading) {
+app.controller('ModalCtrl', function($scope, $ionicLoading, getSubsList, Constant) {
 
   // Close the new task modal
   $scope.closeModal = function() {
     $ionicLoading.show();
-    $scope.getSubsList();
     $scope.modal.hide();
+
+    console.log('$scope.shift', $scope.shift);
+    $scope.doRefresh($scope.shift)
   };
 
  //Cleanup the modal when we're done with it!
@@ -18,7 +20,6 @@ app.controller('ModalCtrl', function($scope, $ionicLoading) {
   // Execute action on remove modal
   $scope.$on('modal.removed', function() {
     // Execute action
-    console.log('3')
   });
 
 

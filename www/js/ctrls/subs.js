@@ -1,4 +1,7 @@
+
 app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant, CallTroop, MenuF, ObjF, chainReq, $timeout, $filter, getSubsList) {
+  'use strict';
+
   $ionicLoading.show();
   $scope.error = '';
   $scope.subsCl = [];
@@ -19,31 +22,31 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant
       var count= 1;
       return function () {
           return count++;
-      }
+      };
   })();
 
 
   $scope.toggleClaim = function(fl) {
-    $scope.subsCl.forEach(function(element, index, array) {
+    $scope.subsCl.forEach(function(element) {
       element.choosen = fl;
     });
-  }
+  };
 
   $scope.newPost = function() {
     $scope.postData = [];
     $scope.isDisabled = true;
 
 
-    $scope.subsCl.forEach(function(element, index, array){
+    $scope.subsCl.forEach(function(element, index){
 
       if (element.choosen) {
         var obj = MenuF.emptyObj();
 
         //inconsistent data!
-          angular.extend(element, {'index': index, 'teacherMemberId': Constant.teacherMemberId, 'classStatus': new Array(element.classStatusCode, 'Subout')})
+          angular.extend(element, {'index': index, 'teacherMemberId': Constant.teacherMemberId, 'classStatus': new Array(element.classStatusCode, 'Subout')});
         //inconsistent data!
 
-        Array.prototype.forEach.call(Object.keys(element), function (keyName, i, arr){
+        Array.prototype.forEach.call(Object.keys(element), function (keyName){
           ObjF.replaceObjectKeysToValue(obj, keyName, element[keyName], true);
         });
 
@@ -57,56 +60,72 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant
       $scope.modal.show();
     });
 
-  }
+  };
 
 
-  $scope.moreDataCanBeLoaded = function(shift) {
-    console.log('shift', shift);
-    var fl = shift < 9  ? true : false;
+  $scope.moreDataCanBeLoaded = function() {
+    var fl = $scope.shift < 9  ? true : false;
     return fl;
-  }
+  };
 
   $scope.loadMoreData = function() {
     $scope.shift = step();
-    console.log('loadMoreData', $scope.shift)
+    console.log('loadMoreData', $scope.shift);
 
+    $scope.interval = $filter('SetIntDay')(Constant.currentDay, $scope.shift);
     getSubsList(Constant.currentDay, $scope.shift).then(function(data) {
 
-      if (data.err) {
-        $scope.error = data.err; return;
+      if (data.error) {
+        $scope.error = data.error; return;
       }
-      $scope.subsCl = data['subsCl'];//$scope.subsCl.concat(data['subsCl']);
+      $scope.subsCl = data.subsCl;//$scope.subsCl.concat(data['subsCl']);
 
       $timeout(function() {
         $scope.$broadcast('scroll.infiniteScrollComplete');
       }, 2000);
 
     });
-  }
+  };
 
   $scope.$on('$stateChangeSuccess', function() {
-    $scope.loadMoreData();
+    //$scope.loadMoreData();
   });
 
-  $scope.doRefresh = function() {
-    getSubsList(Constant.currentDay, 0).then(function(data) {
-      if (data.err) {
-        $scope.error = data.err; return;
+  $scope.doRefresh = function(shift) {
+    $scope.interval = $filter('SetIntDay')(Constant.currentDay, shift || 0);
+    getSubsList(Constant.currentDay, shift || 0).then(function(data) {
+      if (data.error) {
+        $scope.error = data.error; return;
       }
-      $scope.subsCl = data['subsCl'];
-      $scope.shift = 0;
+      $scope.subsCl = data.subsCl;
+      $scope.shift = shift || 0;
       $scope.$broadcast('scroll.refreshComplete');
     });
 
   };
 
-
-  getSubsList(Constant.currentDay).then(function(data) {
-      if (data.err) {
-        $scope.error = data.err; return;
+  $scope.interval = $filter('SetIntDay')(Constant.currentDay, $scope.shift);
+  getSubsList(Constant.currentDay, $scope.shift).then(function(data) {
+      if (data.error) {
+        $scope.error = data.error; return;
       }
-      $scope.subsCl = data['subsCl'];
+      $scope.subsCl = data.subsCl;
   });
+
+/*
+
+
+link: function($scope, element, attrs){
+
+    $scope.$parent.$watch(attrs.ngDisabled, function(newVal){
+        element.prop('disabled', newVal);
+    });
+
+    //...
+}
+
+
+*/
 
 
 });

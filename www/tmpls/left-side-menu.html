@@ -4,7 +4,7 @@
   </ion-header-bar>
   <ion-content scroll="false">
     <ion-list>
-        <ion-item ng-repeat="item in menu" ui-sref="{{item.sref}}" ng-click="selectMenu(item, $index)" ng-class="{active: activeMenu == item}"  >
+        <ion-item ng-repeat="item in menu" ui-sref="{{item.sref}}" ng-click="selectMenu(item)" ng-class="{active: activeMenu == item}"  >
           {{item.title}}
         </ion-item>
 

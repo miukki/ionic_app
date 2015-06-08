@@ -1,4 +1,5 @@
 app.controller('MainCtrl', function($scope, $timeout, MenuF, $ionicSideMenuDelegate, $ionicLoading) {
+  'use strict';
 
   $scope.stateMenu = true;
   $scope.menu = MenuF.all();
@@ -13,7 +14,7 @@ app.controller('MainCtrl', function($scope, $timeout, MenuF, $ionicSideMenuDeleg
   });
 
 
-  $scope.selectMenu = function(item, index) {
+  $scope.selectMenu = function(item) {
     $scope.activeMenu = item;
     $scope.toggleMenu($scope.stateMenu);
   };
@@ -33,7 +34,7 @@ app.controller('MainCtrl', function($scope, $timeout, MenuF, $ionicSideMenuDeleg
 
   // $timeout so everything is initialized
   $timeout(function() {
-    if($scope.menu.length == 0) {
+    if($scope.menu.length === 0) {
       while(true) {
         //show popup 'no-data available'
         break;

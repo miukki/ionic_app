@@ -28,17 +28,16 @@
 
         <ion-refresher pulling-text="Pull to refresh" on-refresh="doRefresh()"></ion-refresher>
 
-        <ion-toggle ng-repeat="item in subsCl" ng-class="{'balanced-bg': item.assigned, 'assertive-bg': item.assigned ===false}" ng-model="item.choosen" toggle-class="toggle-calm">
+        <button class="button button-block">
+          {{interval[0] + ' -  ' + interval[1]}}
+        </button>
+
+
+        <ion-toggle ng-repeat="item in subsCl" ng-class="{'balanced-bg': item.assigned === true, 'assertive-bg': item.assigned === false}" ng-model="item.choosen" toggle-class="toggle-calm">
           {{(item.classGroup ? item.classGroup.serviceTypeCode + ' ' + item.classGroup.levelCode : '') + ' ' + item.day + ' ' + item.month + ' ' + item.time + ' NYT'}}
         </ion-toggle>
 
 
-        <ion-infinite-scroll
-          ng-if="moreDataCanBeLoaded(shift)"
-          on-infinite="loadMoreData()"
-          distance="1%"
-        >
-        </ion-infinite-scroll>
 
         <button type="submit" class="button button-block button-positive" ng-disabled="isDisabled">Submit</button>
 
@@ -47,7 +46,18 @@
 
       <button ng-disabled="isDisabled" class="button button-block button-light" ng-click="toggleClaim(toggle=!toggle)">{{toggle ? 'Check all':'Uncheck all' }}</button>
 
+      <button class="button button-block button-positive" ng-disabled="!moreDataCanBeLoaded()" ng-click="loadMoreData()">Load More</button>
+
+
     </div>
+
+
+    <ion-infinite-scroll
+      ng-if="moreDataCanBeLoaded()"
+      on-infinite="loadMoreData()"
+      distance="1%"
+    >
+    </ion-infinite-scroll>
 
 
    </ion-content>

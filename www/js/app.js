@@ -6,34 +6,34 @@ var teacherMemberId = '1872';
 // the 2nd parameter is an array of 'requires'
 var app = angular.module('starter', ['ionic']);
 
-
 app.config(function($stateProvider, $urlRouterProvider) {
-  $urlRouterProvider.otherwise('/')
+  'use strict';
+  $urlRouterProvider.otherwise('/');
 
   $stateProvider.state('index', {
-    url: '/list',
+    url: '/',
     templateUrl: 'index.html',
     controller: 'IndexCtrl'
-  })
+  });
 
   $stateProvider.state('subs', {
     url: '/subs',
     templateUrl: 'subs.html',
     controller: 'SubsCtrl'
-  })
+  });
 
   $stateProvider.state('upcoming', {
     url: '/upcoming',
     templateUrl: 'upcoming.html',
     controller: 'UpcomingCtrl'
-  })
+  });
 
 })
 
 
 .run(function($ionicPlatform) {
     //load templates
-
+  'use strict';
   $ionicPlatform.ready(function() {
     console.log('ionic platform ready');
 
@@ -64,18 +64,19 @@ app.config(function($stateProvider, $urlRouterProvider) {
 })
 
 .factory('ObjF', function() {
+  'use strict';
   return {
     replaceObjectKeysToValue: function(obj, key, value, needAll) {
         var that = this;
         function isObject(some) {
-            return (typeof some == 'object' && !Array.isArray(some));
+            return (typeof some === 'object' && !Array.isArray(some));
         }
         var replaced = false;
         var method = needAll ? 'forEach' : 'some';
 
         Array.prototype[method].call(Object.keys(obj), function (keyName) {
 
-            if (keyName == key) {
+            if (keyName === key) {
                 obj[keyName] = value;
                 replaced = true;
                 return true;
@@ -92,11 +93,12 @@ app.config(function($stateProvider, $urlRouterProvider) {
         return replaced;
     }
 
-  }
+  };
 
 })
 
 .factory('MenuF', function() {
+  'use strict';
   return {
     all: function() {
       return [
@@ -109,10 +111,10 @@ app.config(function($stateProvider, $urlRouterProvider) {
       ];
     },
     odds: function(){
-      return this.all().filter(function(v, i, arr){return i%2==0})
+      return this.all().filter(function(v, i){return i%2===0;});
     },
     evens: function() {
-      return this.all().filter(function(v, i, arr){return i%2!=0})
+      return this.all().filter(function(v, i){return i%2!==0;});
     },
     emptyObj: function() {
       return {'param': {
@@ -139,7 +141,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
       };
     }
 
-  }
+  };
 })
 
 /*
@@ -161,6 +163,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
 */
 
 .factory('formDataObject', function() {
+    'use strict';
     return function(data) {
         var fd = new FormData();
         angular.forEach(data, function(value, key) {
@@ -171,6 +174,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
 })
 
 .factory('CallTroop', function($q, formDataObject, $http) {
+    'use strict';
     return function(URL, DATA, fl) {
       var deferred = $q.defer();
       var req = {
@@ -180,7 +184,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
        headers: {'Content-Type': fl ? 'application/json' : undefined} //fl - if you need send post request with data
       };
       if (!fl) {
-        req['transformRequest'] = formDataObject
+        req.transformRequest = formDataObject;
       }
 
       $http(req).then(function(resp) {
@@ -190,8 +194,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
           deferred.reject({'code': resp.data[0].status, 'statusText': resp.data[0].message});
         }
       }, function(err){
-        console.log('err', err)
-        deferred.reject(err);
+        deferred.reject({'code': err.status, 'statusText': err.statusText});
       });
 
       return deferred.promise;
@@ -200,32 +203,33 @@ app.config(function($stateProvider, $urlRouterProvider) {
 })
 
 .factory('chainReq', function($q, CallTroop, Constant){
+  'use strict';
   return function(arr, subsCl){
     var output = [], deferred = $q.defer();
-
-    fn(arr, 0);
 
     function fn(arr,index) {
       if (!arr[index]) {
         deferred.resolve();
         return;
-      };
+      }
 
       CallTroop(Constant.path.subsChain, arr[index], true).then(function(resp){
-          subsCl[arr[index].param['index']]['assigned'] = true;
-          console.log('! success', subsCl[arr[index].param['index']]);
+          subsCl[arr[index].param.index].assigned = true;
+          console.log('! success', subsCl[arr[index].param.index]);
 
       }, function(err){
-          subsCl[arr[index].param['index']]['assigned'] = false;
+          subsCl[arr[index].param.index].assigned = false;
           console.error('ERR', err.code, err.statusText);
 
       }).finally(function(){
-          var idx = arr[index].param['index'];
+          var idx = arr[index].param.index;
           //output = output.concat(subsCl.filter(function(v, i, arr){return i === idx}))
           index++; fn(arr, index);
       });
 
-    };
+    }
+
+    fn(arr, 0);
 
     return deferred.promise;
 
@@ -234,6 +238,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
 })
 
 .factory('getSubsList', function(CallTroop, Constant, $filter, $ionicLoading) {
+  'use strict';
   return function(day, shift) {
 
     var interval = $filter('SetIntDay')(day, shift),//0 - offset days
@@ -251,7 +256,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
         } else {
           subsCl.forEach(function(element, index, array) {
             var t = new Date(element.startTime);
-            angular.extend(element, {month: $filter('date')(t, 'MMM'), day: $filter('date')(t, 'dd'), time: $filter('date')(t, 'hh') + ':' + $filter('date')(t, 'mm'), choosen: false, assigned: undefined})
+            angular.extend(element, {month: $filter('date')(t, 'MMM'), day: $filter('date')(t, 'dd'), time: $filter('date')(t, 'hh') + ':' + $filter('date')(t, 'mm'), choosen: false, assigned: undefined});
           });
         }
 
@@ -261,9 +266,9 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
     }, function(err) {
 
-        console.error('ERR', err, err ? (err.code + err.statusText) : '');
+        console.error('ERR !', err, err ? (err.code + ' ' +  err.statusText) : '');
         $ionicLoading.hide();
-        error = 'Error: ' +  err.statusText || 'Error Request';
+        error = 'Error: ' +  err.code + ' ' + err.statusText || 'Error Request';
         return {error};
     });
 
@@ -272,6 +277,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
 })
 
 .filter('sprintf', function() {
+    'use strict';
     return function() {
 
       function parse(str, args) {
@@ -281,30 +287,33 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
       return parse(Array.prototype.slice.call(arguments, 0,1)[0], Array.prototype.slice.call(arguments, 1));
 
-  }
+    };
 
 })
 
 .filter('SetIntDay', function($filter){
+  'use strict';
   return function(t, shift) {
+
+    function shiftDay(d, shift) {
+      if (!shift) {
+        return new Date(d);
+      }
+      return new Date(new Date(d).setDate(new Date(d).getDate() + shift));
+    }
+
     var currD = shiftDay(t,shift),
     nextD = shiftDay(currD,1),
     output = [];
 
-    function shiftDay(d, shift) {
-      if (!shift) {
-        return new Date(d)
-      }
-      return new Date(new Date(d).setDate(new Date(d).getDate() + shift))
-    };
 
     function format(t) {
       //making format yyyy-mm-dd
       return $filter('date')(t,'yyyy') + '-' + $filter('date')(t,'MM') + '-' + $filter('date')(t,'dd');
-    };
+    }
 
-    return output.concat([format(currD), format(nextD)])
-  }
+    return output.concat([format(currD), format(nextD)]);
+  };
 });
 
 

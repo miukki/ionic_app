@@ -8,18 +8,24 @@ var rename = require('gulp-rename');
 var sh = require('shelljs');
 var templateCache = require('gulp-angular-templatecache');
 var concat = require('gulp-concat');
+var jshint = require('gulp-jshint');
 
 var paths = {
   sass: ['./scss/**/*.scss', './www/lib/ionic/scss/**/*.scss'],
-  tmpls: ['www/tmpls/**/*.html'],
-  ctrls: ['www/ctrls/**/*.js']
-
+  tmpls: ['./www/tmpls/**/*.html'],
+  ctrls: ['./www/js/ctrls/**/*.js'],
+  lint: ['./www/js/ctrls/**/*.js', './www/js/app.js']
 };
 
-gulp.task('tmpl', ['tmpl']);
 
-gulp.task('default', ['sass']);
+gulp.task('default', ['sass', 'tmpl', 'ctrl']);
 
+gulp.task('lint', function() {
+  return gulp.src(paths.lint)
+    .pipe(jshint())
+    .pipe(jshint.reporter('jshint-stylish', { verbose: true }))
+    .pipe(jshint.reporter('fail'));
+});
 
 gulp.task('ctrl', function () {
     gulp.src(paths.ctrls[0])
