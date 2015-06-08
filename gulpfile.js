@@ -58,13 +58,6 @@ gulp.task('watch', function() {
   gulp.watch(paths.ctrls, ['ctrl']);
 });
 
-gulp.task('install', ['git-check'], function() {
-  return bower.commands.install()
-    .on('log', function(data) {
-      gutil.log('bower', gutil.colors.cyan(data.id), data.message);
-    });
-});
-
 gulp.task('git-check', function(done) {
   if (!sh.which('git')) {
     console.log(
@@ -77,3 +70,12 @@ gulp.task('git-check', function(done) {
   }
   done();
 });
+
+//bower components
+gulp.task('install', ['git-check'], function() {
+  return bower.commands.install()
+    .on('log', function(data) {
+      gutil.log('bower', gutil.colors.cyan(data.id), data.message);
+    });
+});
+
