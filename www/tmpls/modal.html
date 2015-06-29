@@ -18,7 +18,7 @@
 
       <ion-list>
         <ion-item ng-repeat="item in subsCl | filter: {'assigned': false}: true" class="assertive-bg">
-          {{(item.classGroup ? item.classGroup.serviceTypeCode + ' ' + item.classGroup.levelCode : '') + ' ' + item.day + ' ' + item.month + ' ' + item.time + ' NYT' + ' : fail'}}
+          {{(item.classGroup ? item.classGroup.serviceTypeCode + ' ' + item.classGroup.levelCode : '') + ' ' + item.day + ' ' + item.month + ' ' + item.time + ' NYT' + ' : ' + item.errorMessage}}
         </ion-item>
       </ion-list>
 

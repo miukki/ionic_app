@@ -1,7 +1,5 @@
-app.controller('IndexCtrl', function($scope, MenuF, $ionicLoading) {
+angular.module('starter').controller('IndexCtrl', function($scope, MenuF, $ionicLoading) {
   'use strict';
   $ionicLoading.hide();
-  $scope.menuOdds = MenuF.odds();
-  $scope.menuEvens = MenuF.evens();
-
+  $scope.menu = MenuF.all();
 });

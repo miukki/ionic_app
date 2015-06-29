@@ -1,13 +1,7 @@
-var teacherMemberId = '1872';
-// Ionic Starter App
+angular.module('starter', ['ionic']).config(function($stateProvider, $urlRouterProvider) {
 
-// angular.module is a global place for creating, registering and retrieving Angular modules
-// 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
-// the 2nd parameter is an array of 'requires'
-var app = angular.module('starter', ['ionic']);
-
-app.config(function($stateProvider, $urlRouterProvider) {
   'use strict';
+
   $urlRouterProvider.otherwise('/');
 
   $stateProvider.state('index', {
@@ -17,6 +11,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
   });
 
   $stateProvider.state('subs', {
+
     url: '/subs',
     templateUrl: 'subs.html',
     controller: 'SubsCtrl'
@@ -28,18 +23,22 @@ app.config(function($stateProvider, $urlRouterProvider) {
     controller: 'UpcomingCtrl'
   });
 
+  $stateProvider.state('nograded', {
+    url: '/nograded',
+    templateUrl: 'nograded.html',
+    controller: 'NogradedCtrl'
+  });
+
 })
 
 
 .run(function($ionicPlatform) {
-    //load templates
   'use strict';
+
   $ionicPlatform.ready(function() {
     console.log('ionic platform ready');
 
-    // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
-    // for form inputs)
-
+    // Hide the accessory bar by default
     if(window.cordova && window.cordova.plugins.Keyboard) {
       cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
     }
@@ -53,14 +52,37 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
 
 .constant('Constant', {
-    'strq': 'axis_assignable_class_type!\'{"TimeRange":{"StartTime":"%s","EndTime":"%s"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "%s" }}\'',
+    'strqNoGraded': 'axis_composite_class!\'{"TimeRange":{"StartTime":"%s","EndTime":"%s"},"Assignment":{"TeacherMemberId": "%s"},"ClassStatus":["assigned","booked"]}\'',
+    'strqSubs': 'axis_assignable_class_type!\'{"TimeRange":{"StartTime":"%s","EndTime":"%s"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "%s" }}\'',
     'path': {
-      'up': '/axis/wechat/LoadNextClassesMock?count=100',
+      'up': '/axis/wechat/LoadNextClasses?count=100',
       'subs': '/services/api/axis/query',
-      'subsChain': '/services/api/axis/command/classcommand/AssignClass'
+      'subsChain': '/services/api/axis/command/classcommand/AssignClass',
+      'swichAv': '/services/api/axis/command/teachercommand/UpdateAvailability'
     },
-    'teacherMemberId': teacherMemberId || '1872',
-    'currentDay': '2015-12-01'
+    'loaderSet': {
+      content: '<ion-spinner icon="dots"></ion-spinner>',
+      hideOnStageChange: true,
+      animation: 'fade-in',
+      showDelay: 0
+    }
+
+})
+
+.factory('teacherMemberId', function(CallTroop, Constant){
+  'use strict';
+  return new CallTroop(Constant.path.subs, {q:'axis_context!current'}).then(function(resp){
+    return resp.data[0].data.memberId;
+  });
+})
+
+
+.factory('currentDay', function(CallTroop, Constant, $filter) {
+  'use strict';
+  return new CallTroop(Constant.path.subs, {q:'axis_server_time!current'}).then(function(resp){
+    var t = resp.data[0].data;
+    return $filter('YYYYMMDD')($filter('standartTimeStr')(t));
+  });
 })
 
 .factory('ObjF', function() {
@@ -104,10 +126,8 @@ app.config(function($stateProvider, $urlRouterProvider) {
       return [
         {'title': 'Subs Available', 'sref': 'subs'},
         {'title': 'My Upcoming Classes', 'sref': 'upcoming'},
-        {'title': 'My Overdue Tasks', 'sref': 'index'},
-        {'title': 'My Availability', 'sref': 'index'},
-        {'title': 'My Finished Classes', 'sref': 'index'},
-        {'title': 'My EF', 'sref': 'index'}
+        {'title': 'No graded Classes', 'sref': 'nograded'}
+
       ];
     },
     odds: function(){
@@ -162,158 +182,194 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
 */
 
-.factory('formDataObject', function() {
-    'use strict';
-    return function(data) {
-        var fd = new FormData();
-        angular.forEach(data, function(value, key) {
-            fd.append(key, value);
-        });
-        return fd;
-    };
+.factory('formDataObject', function() { //transform config for multipart/form-data
+  'use strict';
+  return function(data) {
+      var fd = new FormData();
+      angular.forEach(data, function(value, key) {
+          fd.append(key, value);
+      });
+      return fd;
+  };
 })
 
-.factory('CallTroop', function($q, formDataObject, $http) {
+.factory('CallTroop', function(formDataObject, $http) { //CallTroop - frame for all requests to troop-service
     'use strict';
-    return function(URL, DATA, fl) {
-      var deferred = $q.defer();
+    return function(URL, DATA, ContentType) {
       var req = {
        method: 'POST',
        url: URL,
        data: DATA,
-       headers: {'Content-Type': fl ? 'application/json' : undefined} //fl - if you need send post request with data
+       headers: {'Content-Type': ContentType}
       };
-      if (!fl) {
-        req.transformRequest = formDataObject;
+      if (!ContentType) {
+        req.transformRequest = formDataObject; //transform config for multipart/form-data
       }
 
-      $http(req).then(function(resp) {
-        if (resp.data[0].status === 0) {
-          deferred.resolve(resp);
+      return $http(req).then(function(resp) { //define cash for $http
+        if (resp.data[0].status === 0) { //only for this codeStatus - success
+          return resp;
         } else {
-          deferred.reject({'code': resp.data[0].status, 'statusText': resp.data[0].message});
+          throw resp.data[0];
         }
-      }, function(err){
-        deferred.reject({'code': err.status, 'statusText': err.statusText});
+
       });
 
-      return deferred.promise;
 
     };
 })
+.factory('setAvailability', function(CallTroop, Constant) {
+  'use strict';
+  return function(elem){
+      var strT = elem.param.classCriteria.timeRange.startTime, endT = elem.param.classCriteria.timeRange.endTime, mId = elem.param.teacherCriteria.teacherMemberId;
+      var q = {
+        TimeRange: {StartTime: strT, EndTime: endT},
+        AvailabilityDetail :[{ TeacherMemberId: mId, StartTime: strT, EndTime: endT }]
+      }
+      return new CallTroop(Constant.path.swichAv, {param: q}, 'application/json');
+  };
 
-.factory('chainReq', function($q, CallTroop, Constant){
+})
+.factory('chainReq', function($q, CallTroop, Constant, setAvailability){
   'use strict';
   return function(arr, subsCl){
-    var output = [], deferred = $q.defer();
 
-    function fn(arr,index) {
-      if (!arr[index]) {
-        deferred.resolve();
-        return;
-      }
+    return $q.all(arr.map(function(elem){ //send chain of promises
 
-      CallTroop(Constant.path.subsChain, arr[index], true).then(function(){
-          subsCl[arr[index].param.index].assigned = true;
-          console.log('! success', subsCl[arr[index].param.index]);
+      return setAvailability(elem).then(function(){
+        console.log('availability success!');
+        return new CallTroop(Constant.path.subsChain, elem, 'application/json')
+      }).then(
 
-      }, function(err){
-          subsCl[arr[index].param.index].assigned = false;
-          console.error('ERR', err.code, err.statusText);
+          function(){
+            subsCl[elem.param.index].assigned = true;
+            console.log('! success', subsCl[elem.param.index]);
+          },
+          function(error){
 
-      }).finally(function(){
-          //var idx = arr[index].param.index;
-          //output = output.concat(subsCl.filter(function(v, i, arr){return i === idx}))
-          index++; fn(arr, index);
-      });
+            subsCl[elem.param.index].assigned = false;
+            subsCl[elem.param.index].errorMessage = error.message;
+          }
 
-    }
+      );
 
-    fn(arr, 0);
-
-    return deferred.promise;
+    }));
 
   };
 
 })
 
-.factory('getSubsList', function(CallTroop, Constant, $filter, $ionicLoading) {
+.factory('getMainList', function(CallTroop, Constant, $filter) {
   'use strict';
-  return function(day, shift) {
+  return function(str) {
 
-    var interval = $filter('SetIntDay')(day, shift),//0 - offset days
-    str = $filter('sprintf')(Constant.strq, interval[0], interval[1], Constant.teacherMemberId),
-    subsCl = {},
-    error;
+    return new CallTroop(Constant.path.subs, { q: str }).then(function(resp){
+        var data = resp.data && resp.data[0].data instanceof Array && resp.data[0].data.length  ? resp.data[0].data : [];
 
-    console.log('interval', interval);
+        if (!data.length) {
+          throw {message: 'No data!'}
+        }
 
-    return CallTroop(Constant.path.subs, { q: str }).then(function(resp){
-        subsCl = resp.data && resp.data[0].data instanceof Array && resp.data[0].data.length  ? resp.data[0].data : [];
+        if (data.length){
 
-        if (!subsCl.length){
-          error = 'No data';
-        } else {
+          return data.map(function(element) {
+            var t = $filter('standartTimeStr')(element.startTime);
+            angular.extend(element, {weekday: $filter('date')(t, 'dd','+400') + ' ' + $filter('date')(t,'MMM','+400') + ' ' + $filter('date')(t,'EEE','+400'), time: $filter('date')(t,'shortTime','+400')});
+            return element;
+          });
+
+        }
+
+    });
+
+  }
+
+})
+
+.factory('getSubsList', function(CallTroop, Constant, $filter) {
+  'use strict';
+
+  return function (interval, ID) {
+    var str = $filter('sprintf')(Constant.strqSubs, interval[0], interval[1], ID);
+    console.log('interval!', interval, 'ID', ID); //debug
+
+    return new CallTroop(Constant.path.subs, { q: str }).then(function(resp){
+        var subsCl = resp.data && resp.data[0].data instanceof Array && resp.data[0].data.length  ? resp.data[0].data : [];
+
+        if (!subsCl.length) {
+          throw {message: 'No data!'}
+        }
+        if (subsCl.length){
           subsCl.forEach(function(element) {
-            var t = new Date(element.startTime);
-            angular.extend(element, {month: $filter('date')(t, 'MMM'), day: $filter('date')(t, 'dd'), time: $filter('date')(t, 'hh') + ':' + $filter('date')(t, 'mm'), choosen: false, assigned: undefined});
+            //convert to standartTimeStr otherwise error in Safari
+            var t = $filter('standartTimeStr')(element.startTime);
+            angular.extend(element, {date: $filter('date')(t, 'medium', '+400'), choosen: false});
           });
         }
 
-        $ionicLoading.hide();
-        return {error, subsCl};
-
-
-    }, function(err) {
-
-        console.error('ERR !', err, err ? (err.code + ' ' +  err.statusText) : '');
-        $ionicLoading.hide();
-        error = 'Error: ' +  err.code + ' ' + err.statusText || 'Error Request';
-        return {error};
+        return subsCl;
     });
 
   };
 
+
+
+})
+
+.filter('errorTxt', function() {
+  'use strict';
+  return function (error) { //not asyn we not need use $stateful
+    if (error) return 'Error: ' +  (error.status || '') +  ' ' + (error.statusText || error.message || 'Error Request');
+  };
 })
 
 .filter('sprintf', function() {
     'use strict';
     return function() {
-
       function parse(str, args) {
           var i = 0;
           return str.replace(/%s/g, function() { return args[i++] || '';});
       }
-
       return parse(Array.prototype.slice.call(arguments, 0,1)[0], Array.prototype.slice.call(arguments, 1));
-
     };
+})
 
+.filter('standartTimeStr', function() {
+  'use strict';
+  return function(t){
+    return t.replace(/\s+/g, 'T').concat('.000+00:00');
+  }
+
+})
+
+.filter('YYYYMMDD', function($filter){
+  'use strict';
+  return function(t) {
+    //making format yyyy-mm-dd
+    return $filter('date')(t,'yyyy','+400') + '-' + $filter('date')(t,'MM','+400') + '-' + $filter('date')(t,'dd','+400');
+  };
 })
 
 .filter('SetIntDay', function($filter){
   'use strict';
   return function(t, shift) {
 
-    function shiftDay(d, shift) {
-      if (!shift) {
-        return new Date(d);
-      }
-      return new Date(new Date(d).setDate(new Date(d).getDate() + shift));
-    }
+    var currD = $filter('ShiftDay')(t,shift),
+    nextD = $filter('ShiftDay')(currD,1);
 
-    var currD = shiftDay(t,shift),
-    nextD = shiftDay(currD,1),
-    output = [];
-
-
-    function format(t) {
-      //making format yyyy-mm-dd
-      return $filter('date')(t,'yyyy') + '-' + $filter('date')(t,'MM') + '-' + $filter('date')(t,'dd');
-    }
-
-    return output.concat([format(currD), format(nextD)]);
+    return [].concat([currD, nextD]);
   };
+
+})
+
+.filter('ShiftDay', function($filter){
+  'use strict';
+
+  return function (d, shift) {
+    var date = new Date($filter('date')(d, 'medium', '+400')); //take correct timezone (NYT)
+    return $filter('YYYYMMDD')(date.setDate(date.getDate() + (shift || 0))); //shift day
+  }
+
 
 });
 

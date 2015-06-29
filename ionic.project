@@ -1,10 +1,12 @@
 {
   "name": "ef_app",
   "app_id": "56708905",
-  "proxies": [
-    {
-      "path": "/dev/",
-      "proxyUrl": "http://localhost:8100/#/"
-    }
+  "gulpStartupTasks": [
+    "copy:fonts",
+    "sass",
+    "tmpl",
+    "ctrl",
+    "ng_annotate",
+    "watch"
   ]
 }

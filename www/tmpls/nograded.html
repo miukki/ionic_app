@@ -1,4 +1,4 @@
-<ion-view title="Upcoming Classes (NYT)">
+<ion-view title="No graded Classes (NYT)">
 
   <ion-nav-buttons side="left">
     <!-- Sub Menu -->
@@ -18,14 +18,14 @@
       </div>
     </div>
 
-    <div class="button-bar bar-stable" ng-hide="{{upcomingCl.length == 0}}">
+    <div class="button-bar bar-stable" ng-hide="{{nogradedCl.length == 0}}">
           <a class="button">Class&nbsp;Type</a>
           <a class="button">Level</a>
           <a class="button">Date</a>
           <a class="button">Time</a>
    </div>
 
-    <div class="button-bar bar-light" ng-repeat="item in upcomingCl" >
+    <div class="button-bar bar-light" ng-repeat="item in nogradedCl" >
           <a class="button button-small">{{item.serviceTypeCode}}</a>
           <a class="button button-small">{{item.levelCode}}</a>
           <a class="button button-small">{{item.weekday}}</a>

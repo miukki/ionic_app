@@ -1,0 +1,5 @@
+{
+  "js/app.bundle.js": "/_shared/axis-ui-wechat/{CCL:axis-ui-wechat.version}/js/app.bundle.js",
+  "js/ionic.bundle.min.js": "/_shared/axis-ui-wechat/{CCL:axis-ui-wechat.version}/js/ionic.bundle.min.js",
+  "css/ionic.app.min.css": "/_shared/axis-ui-wechat/{CCL:axis-ui-wechat.version}/css/ionic.app.min.css"
+}

@@ -1,17 +1,8 @@
-app.controller('MainCtrl', function($scope, $timeout, MenuF, $ionicSideMenuDelegate, $ionicLoading) {
+angular.module('starter').controller('MainCtrl', function($scope, $timeout, MenuF, $ionicSideMenuDelegate) {
   'use strict';
 
   $scope.stateMenu = true;
   $scope.menu = MenuF.all();
-
-
-  // Setup the loader
-  $ionicLoading.show({
-    content: '<ion-spinner icon="dots"></ion-spinner>',
-    hideOnStageChange: true,
-    animation: 'fade-in',
-    showDelay: 0
-  });
 
 
   $scope.selectMenu = function(item) {
@@ -30,6 +21,7 @@ app.controller('MainCtrl', function($scope, $timeout, MenuF, $ionicSideMenuDeleg
     $ionicSideMenuDelegate.toggleLeft(fl);
     $scope.stateMenu = !$scope.stateMenu;
   };
+
 
 
   // $timeout so everything is initialized

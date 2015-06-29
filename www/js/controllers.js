@@ -1,25 +1,14 @@
-app.controller('IndexCtrl', function($scope, MenuF, $ionicLoading) {
+angular.module('starter').controller('IndexCtrl', function($scope, MenuF, $ionicLoading) {
   'use strict';
   $ionicLoading.hide();
-  $scope.menuOdds = MenuF.odds();
-  $scope.menuEvens = MenuF.evens();
-
+  $scope.menu = MenuF.all();
 });
 
-app.controller('MainCtrl', function($scope, $timeout, MenuF, $ionicSideMenuDelegate, $ionicLoading) {
+angular.module('starter').controller('MainCtrl', function($scope, $timeout, MenuF, $ionicSideMenuDelegate) {
   'use strict';
 
   $scope.stateMenu = true;
   $scope.menu = MenuF.all();
-
-
-  // Setup the loader
-  $ionicLoading.show({
-    content: '<ion-spinner icon="dots"></ion-spinner>',
-    hideOnStageChange: true,
-    animation: 'fade-in',
-    showDelay: 0
-  });
 
 
   $scope.selectMenu = function(item) {
@@ -40,6 +29,7 @@ app.controller('MainCtrl', function($scope, $timeout, MenuF, $ionicSideMenuDeleg
   };
 
 
+
   // $timeout so everything is initialized
   $timeout(function() {
     if($scope.menu.length === 0) {
@@ -53,13 +43,13 @@ app.controller('MainCtrl', function($scope, $timeout, MenuF, $ionicSideMenuDeleg
 
 });
 
-app.controller('ModalCtrl', function($scope, $ionicLoading) {
+angular.module('starter').controller('ModalCtrl', function($scope, $ionicLoading) {
   'use strict';
   // Close the new task modal
   $scope.closeModal = function() {
     $ionicLoading.show();
     $scope.modal.hide();
-    $scope.doRefresh($scope.shift);
+    $scope.doRefresh();
   };
 
  //Cleanup the modal when we're done with it!
@@ -78,17 +68,61 @@ app.controller('ModalCtrl', function($scope, $ionicLoading) {
 
 });
 
-
-app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant, CallTroop, MenuF, ObjF, chainReq, $timeout, $filter, getSubsList) {
+angular.module('starter').controller('NogradedCtrl', function($scope, $http, $ionicLoading, Constant, $filter, $q, currentDay, teacherMemberId, getMainList) {
   'use strict';
+  $scope.nogradedCl = [];
+  $scope.error = '';
 
-  $ionicLoading.show();
+  var cDay, ID;
+
+  function errCb(error) {
+    $scope.error = error; $ionicLoading.hide(); throw error;
+  }
+
+  $q.all([currentDay, teacherMemberId]).then(function(result){
+    console.log('result', result)
+    cDay = result[0];
+    ID = result[1];
+
+  }, errCb).then(function(){
+
+    $ionicLoading.show(Constant.loaderSet);
+    $scope.interval = [$filter('ShiftDay')(cDay, -7), cDay]
+
+    var str = $filter('sprintf')(Constant.strqNoGraded, $scope.interval[0], $scope.interval[1], ID);
+    return getMainList(str);
+
+  }).then(function(data){ $scope.nogradedCl = data; }, errCb).finally(function(){
+    $ionicLoading.hide();
+  });
+
+
+});
+
+
+angular.module('starter').controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant, MenuF, ObjF, chainReq, $timeout, $filter, getSubsList, currentDay, teacherMemberId, $q) {
+  'use strict';
   $scope.error = '';
   $scope.subsCl = [];
   $scope.isDisabled = false;
   $scope.shift = 0;
 
-  // Create and load the Modal
+  var ID, cDay;
+
+  function errCb(error) {
+    $scope.error = error; $ionicLoading.hide(); throw error;
+  }
+
+  $q.all([currentDay, teacherMemberId]).then(function(result){
+    cDay = result[0];
+    ID = result[1];
+
+  }, errCb).then(function(){
+    $ionicLoading.show(Constant.loaderSet);
+    loadD();
+  });
+
+  // Create and load the Modal (popup for status-of-chosen-classes)
   $ionicModal.fromTemplateUrl('modal.html', function(modal) {
     $scope.modal = modal;
   }, {
@@ -98,12 +132,17 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant
   });
 
 
-  var step = (function() {
-      var count= 1;
-      return function () {
-          return count++;
-      };
-  })();
+  function loadD() {
+    $scope.error = '';
+    $scope.subsCl = '';
+    $scope.interval = $filter('SetIntDay')(cDay, $scope.shift);
+    return getSubsList($scope.interval, ID).then(function(data) {
+      $scope.subsCl = data;
+    }, errCb).then(function(){
+      $ionicLoading.hide();
+    });
+
+  }
 
 
   $scope.toggleClaim = function(fl) {
@@ -112,10 +151,16 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant
     });
   };
 
+  $scope.checkToggle = function() {
+    return $scope.subsCl ? $scope.subsCl.filter(function(element) {
+      return element.choosen === true;
+    }).length : undefined;
+  };
+
+
   $scope.newPost = function() {
     $scope.postData = [];
     $scope.isDisabled = true;
-
 
     $scope.subsCl.forEach(function(element, index){
 
@@ -123,9 +168,10 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant
         var obj = MenuF.emptyObj();
 
         //inconsistent data!
-          angular.extend(element, {'index': index, 'teacherMemberId': Constant.teacherMemberId, 'classStatus': new Array(element.classStatusCode, 'Subout')});
+        angular.extend(element, {'index': index, 'teacherMemberId': ID, 'classStatus': new Array(element.classStatusCode, 'Subout')});
         //inconsistent data!
 
+        //preparing opbject for push to server
         Array.prototype.forEach.call(Object.keys(element), function (keyName){
           ObjF.replaceObjectKeysToValue(obj, keyName, element[keyName], true);
         });
@@ -135,7 +181,7 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant
 
     });
 
-    chainReq($scope.postData, $scope.subsCl).then(function(){
+    chainReq($scope.postData, $scope.subsCl).finally(function(){
       $scope.isDisabled = false;
       $scope.modal.show();
     });
@@ -143,96 +189,69 @@ app.controller('SubsCtrl', function($scope, $ionicModal, $ionicLoading, Constant
   };
 
 
-  $scope.moreDataCanBeLoaded = function() {
-    var fl = $scope.shift < 9  ? true : false;
-    return fl;
+  $scope.pNextPrev = function (dir) {
+    $scope.shift = dir > 0 ? $scope.shift + 1 : $scope.shift - 1;
+    console.log('$scope.shift', $scope.shift);
+    $ionicLoading.show();
+    loadD();
   };
 
   $scope.loadMoreData = function() {
-    $scope.shift = step();
-    console.log('loadMoreData', $scope.shift);
+    $scope.shift = $scope.shift + 1;
 
-    $scope.interval = $filter('SetIntDay')(Constant.currentDay, $scope.shift);
-    getSubsList(Constant.currentDay, $scope.shift).then(function(data) {
-
-      if (data.error) {
-        $scope.error = data.error; return;
-      }
-      $scope.subsCl = data.subsCl;//$scope.subsCl.concat(data['subsCl']);
+    loadD().then(function() {
 
       $timeout(function() {
         $scope.$broadcast('scroll.infiniteScrollComplete');
       }, 2000);
 
     });
+
   };
 
   $scope.$on('$stateChangeSuccess', function() {
-    //$scope.loadMoreData();
+    //$scope.loadMoreData(); not neccessary!
   });
 
-  $scope.doRefresh = function(shift) {
-    $scope.interval = $filter('SetIntDay')(Constant.currentDay, shift || 0);
-    getSubsList(Constant.currentDay, shift || 0).then(function(data) {
-      if (data.error) {
-        $scope.error = data.error; return;
-      }
-      $scope.subsCl = data.subsCl;
-      $scope.shift = shift || 0;
-      $scope.$broadcast('scroll.refreshComplete');
-    });
+
+  $scope.doRefresh = function() {
+      loadD().then(function() {
+        $scope.$broadcast('scroll.refreshComplete');
+      });
 
   };
 
-  $scope.interval = $filter('SetIntDay')(Constant.currentDay, $scope.shift);
-  getSubsList(Constant.currentDay, $scope.shift).then(function(data) {
-      if (data.error) {
-        $scope.error = data.error; return;
-      }
-      $scope.subsCl = data.subsCl;
-  });
-
-/*
-
-
-link: function($scope, element, attrs){
-
-    $scope.$parent.$watch(attrs.ngDisabled, function(newVal){
-        element.prop('disabled', newVal);
-    });
-
-    //...
-}
-
-
-*/
 
 
 });
 
-app.controller('UpcomingCtrl', function($scope, $http, $ionicLoading, Constant, $filter) {
+angular.module('starter').controller('UpcomingCtrl', function($scope, $http, $ionicLoading, Constant, $filter, $q, currentDay, teacherMemberId, getMainList) {
   'use strict';
-  $ionicLoading.show();
   $scope.upcomingCl = [];
   $scope.error = '';
 
-  $http.get(Constant.path.up).then(function(resp) {
-    $scope.upcomingCl = resp.data.IsSuccess && resp.data.Result instanceof Array && resp.data.Result.length  ? resp.data.Result : [];
+  var cDay, ID;
 
-    $scope.upcomingCl.forEach(function(element) {
-      var t = new Date(element.StartTime);
-      angular.extend(element, {weekday: $filter('date')(t, 'EEE'), time: $filter('date')(t, 'hh') + ':' + $filter('date')(t, 'mm')});
+  function errCb(error) {
+    $scope.error = error; $ionicLoading.hide(); throw error;
+  }
 
-    });
+  $q.all([currentDay, teacherMemberId]).then(function(result){
+    console.log('result', result)
+    cDay = result[0];
+    ID = result[1];
 
+  }, errCb).then(function(){
+
+    $ionicLoading.show(Constant.loaderSet);
+    $scope.interval = [cDay, $filter('ShiftDay')(cDay, 7)]
+
+    var str = $filter('sprintf')(Constant.strqNoGraded, $scope.interval[0], $scope.interval[1], ID);
+    return getMainList(str);
+
+  }).then(function(data){ $scope.upcomingCl = data; }, errCb).finally(function(){
     $ionicLoading.hide();
-
-  }, function(err) {
-
-    console.error('ERR', err.config, err.statusText);
-    $ionicLoading.hide();
-    $scope.error = err.statusText || 'Error Request';
-
   });
+
 
 });

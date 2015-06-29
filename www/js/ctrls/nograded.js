@@ -1,6 +1,6 @@
-angular.module('starter').controller('UpcomingCtrl', function($scope, $http, $ionicLoading, Constant, $filter, $q, currentDay, teacherMemberId, getMainList) {
+angular.module('starter').controller('NogradedCtrl', function($scope, $http, $ionicLoading, Constant, $filter, $q, currentDay, teacherMemberId, getMainList) {
   'use strict';
-  $scope.upcomingCl = [];
+  $scope.nogradedCl = [];
   $scope.error = '';
 
   var cDay, ID;
@@ -17,12 +17,12 @@ angular.module('starter').controller('UpcomingCtrl', function($scope, $http, $io
   }, errCb).then(function(){
 
     $ionicLoading.show(Constant.loaderSet);
-    $scope.interval = [cDay, $filter('ShiftDay')(cDay, 7)]
+    $scope.interval = [$filter('ShiftDay')(cDay, -7), cDay]
 
     var str = $filter('sprintf')(Constant.strqNoGraded, $scope.interval[0], $scope.interval[1], ID);
     return getMainList(str);
 
-  }).then(function(data){ $scope.upcomingCl = data; }, errCb).finally(function(){
+  }).then(function(data){ $scope.nogradedCl = data; }, errCb).finally(function(){
     $ionicLoading.hide();
   });
 

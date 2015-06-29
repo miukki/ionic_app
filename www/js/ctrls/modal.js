@@ -1,10 +1,10 @@
-app.controller('ModalCtrl', function($scope, $ionicLoading) {
+angular.module('starter').controller('ModalCtrl', function($scope, $ionicLoading) {
   'use strict';
   // Close the new task modal
   $scope.closeModal = function() {
     $ionicLoading.show();
     $scope.modal.hide();
-    $scope.doRefresh($scope.shift);
+    $scope.doRefresh();
   };
 
  //Cleanup the modal when we're done with it!

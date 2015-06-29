@@ -3,18 +3,16 @@
   height: 100%;
   width: 100%;
 }
-.pull-right {
-  float: right;
-}
 .small {
   font-size: 80%;
 }
 .card {
-  margin: 0px 10px;
+  margin: 10px;
+}
+.p015 {
+  padding: 0px 15px !important;
 }
 
-
-
-
-
-
+.item-toggle {
+  box-sizing: border-box
+}

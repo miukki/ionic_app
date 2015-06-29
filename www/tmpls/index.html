@@ -10,25 +10,13 @@
   </ion-nav-buttons>
 
   <ion-content padding="true">
-    <div class="row clearfix responsive-sm" ng-repeat="odd in menuOdds">
-       <div class="col col-50">
 
-        <div class="card">
-          <div class="item item-text-wrap">
-            <button class="button button-clear" ui-sref="{{odd.sref}}">{{odd.title}}</button>
+          <div class="card" ng-repeat="item in menu">
+            <div class="item item-text-wrap" ui-sref="{{item.sref}}">
+              <button class="button button-clear" >{{item.title}}</button>
+            </div>
           </div>
-        </div>
 
-       </div>
-       <div class="col col-50">
 
-        <div class="card">
-          <div class="item item-text-wrap">
-            <button class="button button-clear" ui-sref="{{menuEvens[$index].sref}}">{{menuEvens[$index].title}}</button>
-          </div>
-        </div>
-
-       </div>
-    </div>
   </ion-content>
 </ion-view>

@@ -12,48 +12,35 @@
   </ion-nav-buttons>
 
 
+<ion-header-bar align-title="center" class="bar-light">
+ <button class="button ion-chevron-left p015" ng-disabled="(!shift) ? true : false" ng-click="pNextPrev(-1)"></button>
+  <h1 class="title">{{interval[0]}}</h1>
+ <button class="button ion-chevron-right p015" ng-click="pNextPrev(1)" ng-disabled="(shift < 9) ? false : true"></button>
+</ion-header-bar>
+
   <ion-content padding="true">
 
-    <div ng-show="(error && error != '') || subsCl.length == 0" class="ng-hide card" >
+    <div ng-show="error" class="ng-hide card" >
       <div class="item item-text-wrap assertive">
-        {{error}}
+        {{error | errorTxt}}
       </div>
     </div>
 
 
-
     <div ng-class="{'ng-hide': subsCl.length == 0}">
 
-      <form ng-submit="newPost()">
-
-        <ion-refresher pulling-text="Pull to refresh" on-refresh="doRefresh()"></ion-refresher>
-
-        <button class="button button-block">
-          {{interval[0] + ' -  ' + interval[1]}}
-        </button>
-
+      <form name="myForm" >
+        <ion-refresher pulling-text="Pull to refresh.." on-refresh="doRefresh()"></ion-refresher>
 
         <ion-toggle ng-repeat="item in subsCl" ng-class="{'balanced-bg': item.assigned === true, 'assertive-bg': item.assigned === false}" ng-model="item.choosen" toggle-class="toggle-calm">
-          {{(item.classGroup ? item.classGroup.serviceTypeCode + ' ' + item.classGroup.levelCode : '') + ' ' + item.day + ' ' + item.month + ' ' + item.time + ' NYT'}}
+          {{(item.classGroup ? item.classGroup.serviceTypeCode + ' ' + item.classGroup.levelCode : '') + ' ' + item.date +  ' NYT'}}
         </ion-toggle>
-
-
-
-        <button type="submit" class="button button-block button-positive" ng-disabled="isDisabled">Submit</button>
-
-
       </form>
-
-      <button ng-disabled="isDisabled" class="button button-block button-light" ng-click="toggleClaim(toggle=!toggle)">{{toggle ? 'Uncheck all' : 'Check all' }}</button>
-
-      <button class="button button-block button-positive" ng-disabled="!moreDataCanBeLoaded()" ng-click="loadMoreData()">Load More</button>
-
 
     </div>
 
-
     <ion-infinite-scroll
-      ng-if="moreDataCanBeLoaded()"
+      ng-if="(shift < 9 && !error) ? true : false"
       on-infinite="loadMoreData()"
       distance="1%"
     >
@@ -61,4 +48,11 @@
 
 
    </ion-content>
+
+  <ion-footer-bar align-title="left" class="bar-stable">
+    <button ng-disabled="isDisabled || error" class="button" ng-click="toggleClaim(!checkToggle())">{{checkToggle() ? 'Uncheck all' : 'Check all' }}</button>
+
+    <button ng-click="newPost()" class="button button-positive" ng-disabled="isDisabled || error">Submit</button>
+  </ion-footer-bar>
+
 </ion-view>
