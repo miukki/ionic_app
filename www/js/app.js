@@ -52,8 +52,8 @@ angular.module('starter', ['ionic']).config(function($stateProvider, $urlRouterP
 
 
 .constant('Constant', {
-    'strqNoGraded': 'axis_composite_class!\'{"TimeRange":{"StartTime":"%s","EndTime":"%s"},"Assignment":{"TeacherMemberId": "%s"},"ClassStatus":["assigned","booked"]}\'',
-    'strqSubs': 'axis_assignable_class_type!\'{"TimeRange":{"StartTime":"%s","EndTime":"%s"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "%s" }}\'',
+    'strqNoGraded': 'composite_class!\'{"TimeRange":{"StartTime":"%s","EndTime":"%s"},"Assignment":{"TeacherMemberId": "%s"},"ClassStatus":["assigned","booked"]}\'',
+    'strqSubs': 'assignable_class_type!\'{"TimeRange":{"StartTime":"%s","EndTime":"%s"}, "ClassStatus" :["Subout","New"], "AssignableTeacher":{"TeacherMemberId": "%s" }}\'',
     'path': {
       'up': '/axis/wechat/LoadNextClasses?count=100',
       'subs': '/services/api/axis/query',
@@ -71,7 +71,7 @@ angular.module('starter', ['ionic']).config(function($stateProvider, $urlRouterP
 
 .factory('teacherMemberId', function(CallTroop, Constant){
   'use strict';
-  return new CallTroop(Constant.path.subs, {q:'axis_context!current'}).then(function(resp){
+  return new CallTroop(Constant.path.subs, {q:'context!current'}).then(function(resp){
     return resp.data[0].data.memberId;
   });
 })
@@ -79,7 +79,7 @@ angular.module('starter', ['ionic']).config(function($stateProvider, $urlRouterP
 
 .factory('currentDay', function(CallTroop, Constant, $filter) {
   'use strict';
-  return new CallTroop(Constant.path.subs, {q:'axis_server_time!current'}).then(function(resp){
+  return new CallTroop(Constant.path.subs, {q:'server_time!current'}).then(function(resp){
     var t = resp.data[0].data;
     return $filter('YYYYMMDD')($filter('standartTimeStr')(t));
   });
